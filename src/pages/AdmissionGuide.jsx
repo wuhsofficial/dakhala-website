@@ -1,5 +1,6 @@
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ExternalLink } from 'lucide-react';
 import Tilt from 'react-parallax-tilt';
 import EduAnimation from '../components/EduAnimation';
 import { publicUniversities, privateUniversities, semiGovtUniversities, getUniversityBySlug, getUniversityLogo } from '../data/universities';
@@ -9,6 +10,29 @@ import UniversityCard from '../components/UniversityCard';
 export default function AdmissionGuide() {
   const { slug } = useParams();
   const navigate = useNavigate();
+
+  const officialLinks = {
+    fast: "https://admissions.nu.edu.pk/",
+    comsats: "https://admissions.comsats.edu.pk/",
+    "uet-lahore": "https://ecat.uet.edu.pk/",
+    umt: "https://onlineadmissions.umt.edu.pk/",
+    bzu: "https://portal.bzu.edu.pk/admissions/",
+    lums: "https://admissions.lums.edu.pk/application/",
+    nust: "https://ugadmissions.nust.edu.pk/",
+    qau: "https://ugadmissions.qau.edu.pk/",
+    pu: "https://pu.edu.pk/home/admission_notices",
+    giki: "https://giki.edu.pk/admissions/admissions-undergraduates/",
+    itu: "https://itu.edu.pk/admissions/",
+    muet: "https://admissions.muet.edu.pk/",
+    "uet-taxila": "https://admissions.uettaxila.edu.pk",
+    "gcu-lahore": "https://gcu.edu.pk/admissions.php",
+    ned: "https://www.neduet.edu.pk/admission",
+    air: "https://portals.au.edu.pk",
+    pieas: "https://admissions.pieas.edu.pk",
+    uaf: "https://admissions.uaf.edu.pk",
+    uhs: "https://www.uhs.edu.pk/admissions.php",
+    ist: "https://www.ist.edu.pk/admission?section=undergraduate"
+  };
 
   const getSectorBadge = (uni) => {
     if (publicUniversities.some(u => u.id === uni.id)) return 'Public Sector';
@@ -109,6 +133,20 @@ export default function AdmissionGuide() {
                 <li>Generate the application fee challan, deposit it, and upload the paid copy.</li>
                  <li>Submit the application online and track status on the portal dashboard.</li>
               </ol>
+
+              {officialLinks[uni.id] && (
+                <div className="mt-4 pt-4 border-t border-border/50 dark:border-white/10">
+                  <span className="text-sm font-bold text-ink dark:text-white">Official Portal: </span>
+                  <a 
+                    href={officialLinks[uni.id]} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-gold hover:underline font-medium break-all"
+                  >
+                    {officialLinks[uni.id]}
+                  </a>
+                </div>
+              )}
             </div>
 
             {/* Contact */}
