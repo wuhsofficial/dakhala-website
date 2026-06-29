@@ -6,6 +6,8 @@ import EduAnimation from '../components/EduAnimation';
 import { publicUniversities, privateUniversities, semiGovtUniversities, getUniversityBySlug, getUniversityLogo } from '../data/universities';
 import Campus3DModel from '../components/Campus3DModel';
 import UniversityCard from '../components/UniversityCard';
+import { useDataStore } from '../store/useDataStore';
+import EditableBlock from '../components/EditableBlock';
 
 export default function AdmissionGuide() {
   const { slug } = useParams();
@@ -40,9 +42,11 @@ export default function AdmissionGuide() {
     return 'Private Sector';
   };
 
+  const { universities, updateUniversity } = useDataStore();
+
   // INDIVIDUAL UNI PAGE
   if (slug) {
-    const uni = getUniversityBySlug(slug);
+    const uni = universities.find(u => u.slug === slug);
 
     if (!uni) {
       return (
@@ -74,7 +78,9 @@ export default function AdmissionGuide() {
               className="w-16 h-16 md:w-20 md:h-20 object-contain bg-white rounded-2xl p-2 border border-border/50 shadow-md"
             />
             <div>
-              <h2 className="text-xl md:text-2xl font-extrabold text-ink dark:text-white leading-tight">{uni.name}</h2>
+              <h2 className="text-xl md:text-2xl font-extrabold text-ink dark:text-white leading-tight">
+                <EditableBlock value={uni.name} onSave={(val) => updateUniversity(uni.id, { name: val })} />
+              </h2>
               <span className="inline-block mt-2 px-2.5 py-1 bg-gold text-white text-xs font-bold uppercase tracking-wider rounded">
                 {getSectorBadge(uni)}
               </span>
@@ -90,28 +96,40 @@ export default function AdmissionGuide() {
             <div className="bg-white dark:bg-white/[0.02] border border-border dark:border-white/10 rounded-xl p-5">
               <h3 className="text-base md:text-lg font-bold text-ink dark:text-white mb-2.5 pb-1 border-b border-border dark:border-white/10 uppercase tracking-wider">Eligibility</h3>
               <p className="text-muted dark:text-gray-400 leading-relaxed text-sm md:text-base">
-                Applicants must hold a minimum of 60% marks in SSC (Matriculation) or equivalent O-Level, and a minimum of 60% (or 50% for select engineering domains) in HSSC (Intermediate Pre-Engineering, Pre-Medical, or ICS). A valid score in {uni.entryTest} is mandatory for competitive selection.
+                <EditableBlock 
+                  type="textarea"
+                  value={uni.guideEligibility || `Applicants must hold a minimum of 60% marks in SSC (Matriculation) or equivalent O-Level, and a minimum of 60% (or 50% for select engineering domains) in HSSC (Intermediate Pre-Engineering, Pre-Medical, or ICS). A valid score in ${uni.entryTest} is mandatory for competitive selection.`} 
+                  onSave={(val) => updateUniversity(uni.id, { guideEligibility: val })} 
+                />
               </p>
             </div>
 
             {/* Required Documents */}
             <div className="bg-white dark:bg-white/[0.02] border border-border dark:border-white/10 rounded-xl p-5">
               <h3 className="text-base md:text-lg font-bold text-ink dark:text-white mb-2.5 pb-1 border-b border-border dark:border-white/10 uppercase tracking-wider">Required Documents</h3>
-              <ul className="list-disc list-inside text-sm md:text-base text-muted dark:text-gray-400 space-y-1.5 leading-relaxed">
-                <li>Attested copies of Matric / O-Level marksheet and certificates.</li>
-                <li>Attested copies of Intermediate / A-Level marksheet.</li>
-                <li>IBCC equivalence certificate (for foreign qualifications).</li>
-                <li>CNIC / B-Form and Father's CNIC copies.</li>
-                <li>Original paid bank deposit receipt of application processing fee.</li>
-                <li>4 passport-sized photographs with blue background.</li>
-              </ul>
+              <div className="text-sm md:text-base text-muted dark:text-gray-400 leading-relaxed whitespace-pre-wrap">
+                <EditableBlock 
+                  type="textarea"
+                  value={uni.guideDocuments || `• Attested copies of Matric / O-Level marksheet and certificates.
+• Attested copies of Intermediate / A-Level marksheet.
+• IBCC equivalence certificate (for foreign qualifications).
+• CNIC / B-Form and Father's CNIC copies.
+• Original paid bank deposit receipt of application processing fee.
+• 4 passport-sized photographs with blue background.`} 
+                  onSave={(val) => updateUniversity(uni.id, { guideDocuments: val })} 
+                />
+              </div>
             </div>
 
             {/* Fee Structure */}
             <div className="bg-white dark:bg-white/[0.02] border border-border dark:border-white/10 rounded-xl p-5">
               <h3 className="text-base md:text-lg font-bold text-ink dark:text-white mb-2.5 pb-1 border-b border-border dark:border-white/10 uppercase tracking-wider">Fee Structure</h3>
               <p className="text-sm md:text-base text-muted dark:text-gray-400 leading-relaxed">
-                The semester fee for undergraduate programs is approximately <strong>Rs. {uni.feePerSemester.toLocaleString()}</strong> per semester. Admission fee (one-time) and a refundable security deposit of Rs. 10,000–20,000 are payable during initial enrollment.
+                <EditableBlock 
+                  type="textarea"
+                  value={uni.guideFee || `The semester fee for undergraduate programs is approximately Rs. ${uni.feePerSemester?.toLocaleString() || ''} per semester. Admission fee (one-time) and a refundable security deposit of Rs. 10,000–20,000 are payable during initial enrollment.`} 
+                  onSave={(val) => updateUniversity(uni.id, { guideFee: val })} 
+                />
               </p>
             </div>
 
@@ -119,31 +137,43 @@ export default function AdmissionGuide() {
             <div className="bg-white dark:bg-white/[0.02] border border-border dark:border-white/10 rounded-xl p-5">
               <h3 className="text-base md:text-lg font-bold text-ink dark:text-white mb-2.5 pb-1 border-b border-border dark:border-white/10 uppercase tracking-wider">Hostel Accommodation</h3>
               <p className="text-sm md:text-base text-muted dark:text-gray-400 leading-relaxed">
-                On-campus residential facilities are available for outstation students on a first-come, first-served merit basis. Hostel charges range between Rs. 15,000 to Rs. 25,000 per semester (excluding food).
+                <EditableBlock 
+                  type="textarea"
+                  value={uni.guideHostel || `On-campus residential facilities are available for outstation students on a first-come, first-served merit basis. Hostel charges range between Rs. 15,000 to Rs. 25,000 per semester (excluding food).`} 
+                  onSave={(val) => updateUniversity(uni.id, { guideHostel: val })} 
+                />
               </p>
             </div>
 
             {/* How to Apply */}
             <div className="bg-white dark:bg-white/[0.02] border border-border dark:border-white/10 rounded-xl p-5">
               <h3 className="text-base md:text-lg font-bold text-ink dark:text-white mb-2.5 pb-1 border-b border-border dark:border-white/10 uppercase tracking-wider">How to Apply</h3>
-              <ol className="list-decimal list-inside text-sm md:text-base text-muted dark:text-gray-400 space-y-1.5 leading-relaxed">
-                <li>Create an account on the official university undergraduate admission portal.</li>
-                <li>Fill out the personal profile and educational credentials.</li>
-                <li>Select your preferred degree programs and upload required documents.</li>
-                <li>Generate the application fee challan, deposit it, and upload the paid copy.</li>
-                 <li>Submit the application online and track status on the portal dashboard.</li>
-              </ol>
+              <div className="text-sm md:text-base text-muted dark:text-gray-400 leading-relaxed whitespace-pre-wrap">
+                <EditableBlock 
+                  type="textarea"
+                  value={uni.guideHowToApply || `1. Create an account on the official university undergraduate admission portal.
+2. Fill out the personal profile and educational credentials.
+3. Select your preferred degree programs and upload required documents.
+4. Generate the application fee challan, deposit it, and upload the paid copy.
+5. Submit the application online and track status on the portal dashboard.`} 
+                  onSave={(val) => updateUniversity(uni.id, { guideHowToApply: val })} 
+                />
+              </div>
 
               {officialLinks[uni.id] && (
                 <div className="mt-4 pt-4 border-t border-border/50 dark:border-white/10">
                   <span className="text-sm font-bold text-ink dark:text-white">Official Portal: </span>
+                  <EditableBlock 
+                    value={uni.officialPortalLink || officialLinks[uni.id]} 
+                    onSave={(val) => updateUniversity(uni.id, { officialPortalLink: val })} 
+                  />
                   <a 
-                    href={officialLinks[uni.id]} 
+                    href={uni.officialPortalLink || officialLinks[uni.id]} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-sm text-gold hover:underline font-medium break-all"
+                    className="text-sm text-gold hover:underline font-medium break-all block mt-1"
                   >
-                    {officialLinks[uni.id]}
+                    Open Link
                   </a>
                 </div>
               )}
@@ -152,10 +182,15 @@ export default function AdmissionGuide() {
             {/* Contact */}
             <div className="bg-white dark:bg-white/[0.02] border border-border dark:border-white/10 rounded-xl p-5">
               <h3 className="text-base md:text-lg font-bold text-ink dark:text-white mb-2.5 pb-1 border-b border-border dark:border-white/10 uppercase tracking-wider">Contact Information</h3>
-              <p className="text-sm md:text-base text-muted dark:text-gray-400 leading-relaxed">
-                <strong>Admissions Office:</strong> {uni.name}, {uni.city}, Pakistan. <br />
-                <strong>Phone:</strong> +92 (51) 111-222-333 | <strong>Email:</strong> admissions@{uni.id}.edu.pk
-              </p>
+              <div className="text-sm md:text-base text-muted dark:text-gray-400 leading-relaxed whitespace-pre-wrap">
+                <EditableBlock 
+                  type="textarea"
+                  value={uni.guideContact || `Admissions Office: ${uni.name}, ${uni.city}, Pakistan.
+Phone: +92 (51) 111-222-333
+Email: admissions@${uni.id}.edu.pk`} 
+                  onSave={(val) => updateUniversity(uni.id, { guideContact: val })} 
+                />
+              </div>
             </div>
           </div>
 
@@ -194,7 +229,7 @@ export default function AdmissionGuide() {
           <span className="text-[11px] text-muted dark:text-gray-400 font-bold ml-2">({publicUniversities.length} Guides)</span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-          {publicUniversities.map(uni => (
+          {universities.filter(u => publicUniversities.some(pu => pu.id === u.id)).map(uni => (
             <Tilt key={uni.id} tiltMaxAngleX={12} tiltMaxAngleY={12} scale={1.03} transitionSpeed={2000}>
               <UniversityCard
                 university={uni}
@@ -212,7 +247,7 @@ export default function AdmissionGuide() {
           <span className="text-[11px] text-muted dark:text-gray-400 font-bold ml-2">({privateUniversities.length} Guides)</span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-          {privateUniversities.map(uni => (
+          {universities.filter(u => privateUniversities.some(pu => pu.id === u.id)).map(uni => (
             <Tilt key={uni.id} tiltMaxAngleX={12} tiltMaxAngleY={12} scale={1.03} transitionSpeed={2000}>
               <UniversityCard
                 university={uni}
@@ -230,7 +265,7 @@ export default function AdmissionGuide() {
           <span className="text-[11px] text-muted dark:text-gray-400 font-bold ml-2">({semiGovtUniversities.length} Guides)</span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-xl">
-          {semiGovtUniversities.map(uni => (
+          {universities.filter(u => semiGovtUniversities.some(pu => pu.id === u.id)).map(uni => (
             <Tilt key={uni.id} tiltMaxAngleX={12} tiltMaxAngleY={12} scale={1.03} transitionSpeed={2000}>
               <UniversityCard
                 university={uni}

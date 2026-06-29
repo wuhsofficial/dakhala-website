@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getUniversityBySlug, allUniversities, getUniversityLogo } from '../data/universities';
+import { getUniversityLogo } from '../data/universities';
+import { useDataStore } from '../store/useDataStore';
 import { useCalculatorStore } from '../store/useCalculatorStore';
 import { useAuthStore } from '../store/useAuthStore';
 import Campus3DModel from '../components/Campus3DModel';
 import Tilt from 'react-parallax-tilt';
 import EduAnimation from '../components/EduAnimation';
+import EditableBlock from '../components/EditableBlock';
 import { logCalculation } from '../lib/telemetry';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from 'recharts';
 import {
@@ -20,7 +22,8 @@ import {
 export default function UniversityDetailCalculator() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const uni = getUniversityBySlug(slug);
+  const { universities, updateUniversity } = useDataStore();
+  const uni = universities.find(u => u.slug === slug);
 
   const [activeTab, setActiveTab] = useState('calculator');
   const [rightPanelTab, setRightPanelTab] = useState('campus');
@@ -340,7 +343,7 @@ Calculate your aggregate instantly on Dakhala:
               </span>
               <span className="px-3 py-1 bg-ink/5 dark:bg-white/5 text-ink/70 dark:text-white/70 border border-border dark:border-white/10 text-[10px] font-extrabold uppercase tracking-wider rounded-lg flex items-center gap-1">
                 <MapPin className="w-2.5 h-2.5" />
-                {uni.city}
+                <EditableBlock value={uni.city} onSave={(val) => updateUniversity(uni.id, { city: val })} />
               </span>
               {uni.categories?.map(cat => (
                 <span key={cat} className="px-2.5 py-0.5 bg-white/60 dark:bg-white/10 text-ink/50 dark:text-white/50 border border-border/60 dark:border-white/10 text-[9px] font-bold uppercase tracking-widest rounded-md">
@@ -350,12 +353,14 @@ Calculate your aggregate instantly on Dakhala:
             </div>
 
             <h1 className="text-2xl md:text-4xl font-black text-ink dark:text-white tracking-tight leading-tight">
-              {uni.name}
-              <span className="text-black dark:text-gold ml-2 text-lg md:text-2xl font-extrabold">({uni.shortName})</span>
+              <EditableBlock value={uni.name} onSave={(val) => updateUniversity(uni.id, { name: val })} />
+              <span className="text-black dark:text-gold ml-2 text-lg md:text-2xl font-extrabold">
+                (<EditableBlock value={uni.shortName} onSave={(val) => updateUniversity(uni.id, { shortName: val })} />)
+              </span>
             </h1>
 
             <p className="text-xs md:text-sm text-muted dark:text-white/60 font-medium max-w-2xl">
-              IBCC Standardized Metrics • Fee: PKR {uni.feePerSemester?.toLocaleString()}/semester • {uni.entryTest}
+              IBCC Standardized Metrics • Fee: PKR <EditableBlock value={uni.feePerSemester} type="number" onSave={(val) => updateUniversity(uni.id, { feePerSemester: Number(val) })} />/semester • <EditableBlock value={uni.entryTest} onSave={(val) => updateUniversity(uni.id, { entryTest: val })} />
             </p>
           </div>
 

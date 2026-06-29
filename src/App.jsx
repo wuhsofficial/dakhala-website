@@ -9,7 +9,9 @@ import { useAppStore } from './store/useAppStore';
 import { logPageView, logAction } from './lib/telemetry';
 import { auth, onAuthStateChanged } from './lib/firebase';
 import { useAuthStore } from './store/useAuthStore';
+import { useDataStore } from './store/useDataStore';
 import whatsappLogo from './assets/whatsapp.png';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function TelemetryTracker() {
   const location = useLocation();
@@ -39,8 +41,11 @@ const AdminPortal = lazy(() => import('./pages/AdminPortal'));
 
 export default function App() {
   const { setUser, clearUser } = useAuthStore();
+  const { fetchData } = useDataStore();
 
   useEffect(() => {
+    fetchData(); // Load universities and dates from Firestore
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
@@ -206,8 +211,8 @@ export default function App() {
             <Route path="/calculator/mdcat" element={<MdcatCalculator />} />
 
             {/* Portals */}
-            <Route path="/student-portal" element={<StudentPortal />} />
-            <Route path="/admin-portal" element={<AdminPortal />} />
+            <Route path="/student-portal" element={<ProtectedRoute><StudentPortal /></ProtectedRoute>} />
+            <Route path="/admin-portal" element={<ProtectedRoute adminOnly><AdminPortal /></ProtectedRoute>} />
 
             {/* Merit & Tracker */}
             <Route path="/merit-tracker/:slug" element={<MeritTracker />} />

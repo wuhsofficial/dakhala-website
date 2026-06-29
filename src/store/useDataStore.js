@@ -1,0 +1,52 @@
+import { create } from 'zustand';
+import { db } from '../lib/firebase';
+import { collection, getDocs } from 'firebase/firestore';
+import { publicUniversities, privateUniversities, semiGovtUniversities } from '../data/universities';
+
+const allStaticUniversities = [...publicUniversities, ...privateUniversities, ...semiGovtUniversities];
+
+export const useDataStore = create((set) => ({
+  universities: allStaticUniversities, // Fallback to all static data
+  dates: [],
+  loading: true,
+  fetchData: async () => {
+    if (!db) {
+      set({ loading: false });
+      return;
+    }
+    try {
+      const unisSnap = await getDocs(collection(db, 'universities'));
+      const datesSnap = await getDocs(collection(db, 'important_dates'));
+      
+      let firestoreUnis = unisSnap.docs.map(doc => doc.data());
+      
+      // Merge: For each static university, if a firestore doc exists, use it, otherwise use static.
+      let unis = allStaticUniversities.map(staticUni => {
+        const cloudUni = firestoreUnis.find(u => u.id === staticUni.id);
+        return cloudUni ? cloudUni : staticUni;
+      });
+
+      // We use the Firestore document ID to allow deleting/editing
+      const dates = datesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      set({ universities: unis, dates, loading: false });
+    } catch (e) {
+      console.error("Error fetching global data", e);
+      set({ loading: false });
+    }
+  },
+  updateUniversity: async (id, updates) => {
+    if (!db) return;
+    try {
+      const { doc, setDoc } = await import('firebase/firestore');
+      await setDoc(doc(db, 'universities', id), updates, { merge: true });
+      set((state) => ({
+        universities: state.universities.map(u => 
+          u.id === id ? { ...u, ...updates } : u
+        )
+      }));
+    } catch (e) {
+      console.error("Failed to update university", e);
+    }
+  }
+}));

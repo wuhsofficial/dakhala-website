@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Tilt from 'react-parallax-tilt';
 import EduAnimation from '../components/EduAnimation';
-import { allUniversities, getUniversityLogo } from '../data/universities';
+import { getUniversityLogo } from '../data/universities';
+import { useDataStore } from '../store/useDataStore';
 import { Search, BookOpen, GraduationCap, ChevronRight, Calculator } from 'lucide-react';
 
 const CATEGORIES = [
@@ -16,12 +17,13 @@ const CATEGORIES = [
 ];
 
 export default function UniversityCalculator() {
+  const { universities } = useDataStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   // Filter & Search Logic
   const filteredUniversities = useMemo(() => {
-    return allUniversities.filter(uni => {
+    return universities.filter(uni => {
       const matchesSearch = 
         uni.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         uni.shortName.toLowerCase().includes(searchTerm.toLowerCase()) ||

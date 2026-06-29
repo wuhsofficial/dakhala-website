@@ -7,6 +7,8 @@ import { motion } from 'framer-motion';
 import Tilt from 'react-parallax-tilt';
 import EduAnimation from '../components/EduAnimation';
 import Campus3DModel from '../components/Campus3DModel';
+import { useDataStore } from '../store/useDataStore';
+import EditableBlock from '../components/EditableBlock';
 
 export default function PastMerits() {
   const { slug } = useParams();
@@ -23,7 +25,8 @@ export default function PastMerits() {
     return () => clearInterval(interval);
   }, []);
 
-  const uni = slug ? getUniversityBySlug(slug) : null;
+  const { universities, updateUniversity } = useDataStore();
+  const uni = slug ? universities.find(u => u.slug === slug) : null;
 
   useEffect(() => {
     if (uni) {
@@ -137,13 +140,15 @@ export default function PastMerits() {
               />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl md:text-3xl font-extrabold text-ink dark:text-white leading-tight tracking-tight">{uni.name}</h2>
+              <h2 className="text-2xl md:text-3xl font-extrabold text-ink dark:text-white leading-tight tracking-tight">
+                <EditableBlock value={uni.name} onSave={(val) => updateUniversity(uni.id, { name: val })} />
+              </h2>
               <div className="flex flex-wrap gap-2.5 items-center">
                 <span className="px-3 py-1 bg-gold text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md">
                   {getSectorBadge(uni)}
                 </span>
                 <span className="text-xs font-semibold text-muted dark:text-gray-400 bg-cloudy dark:bg-white/5 px-3 py-1 rounded-lg border border-border dark:border-white/5">
-                  {uni.entryTest} Required
+                  <EditableBlock value={uni.entryTest} onSave={(val) => updateUniversity(uni.id, { entryTest: val })} /> Required
                 </span>
                 <button
                   onClick={handleToggleBookmark}
@@ -355,13 +360,14 @@ export default function PastMerits() {
           <h3 className="text-lg font-extrabold text-ink dark:text-white tracking-wide">PUBLIC SECTOR</h3>
           <span className="bg-cloudy dark:bg-white/5 border border-border dark:border-white/10 text-xs text-muted dark:text-cloudy font-bold px-3 py-1 rounded-full">{publicUniversities.length} Institutions</span>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {publicUniversities.map(uni => (
-            <UniversityCard
-              key={uni.id}
-              university={uni}
-              onClick={() => navigate(`/past-merits/${uni.slug}`)}
-            />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          {universities.filter(u => publicUniversities.some(pu => pu.id === u.id)).map(uni => (
+            <Tilt key={uni.id} tiltMaxAngleX={12} tiltMaxAngleY={12} scale={1.03} transitionSpeed={2000}>
+              <UniversityCard
+                university={uni}
+                onClick={() => navigate(`/past-merits/${uni.slug}`)}
+              />
+            </Tilt>
           ))}
         </div>
       </div>
@@ -372,13 +378,14 @@ export default function PastMerits() {
           <h3 className="text-lg font-extrabold text-ink dark:text-white tracking-wide">PRIVATE SECTOR</h3>
           <span className="bg-cloudy dark:bg-white/5 border border-border dark:border-white/10 text-xs text-muted dark:text-cloudy font-bold px-3 py-1 rounded-full">{privateUniversities.length} Institutions</span>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {privateUniversities.map(uni => (
-            <UniversityCard
-              key={uni.id}
-              university={uni}
-              onClick={() => navigate(`/past-merits/${uni.slug}`)}
-            />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          {universities.filter(u => privateUniversities.some(pu => pu.id === u.id)).map(uni => (
+            <Tilt key={uni.id} tiltMaxAngleX={12} tiltMaxAngleY={12} scale={1.03} transitionSpeed={2000}>
+              <UniversityCard
+                university={uni}
+                onClick={() => navigate(`/past-merits/${uni.slug}`)}
+              />
+            </Tilt>
           ))}
         </div>
       </div>
@@ -389,13 +396,14 @@ export default function PastMerits() {
           <h3 className="text-lg font-extrabold text-ink dark:text-white tracking-wide">SEMI-GOVERNMENT</h3>
           <span className="bg-cloudy dark:bg-white/5 border border-border dark:border-white/10 text-xs text-muted dark:text-cloudy font-bold px-3 py-1 rounded-full">{semiGovtUniversities.length} Institutions</span>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl">
-          {semiGovtUniversities.map(uni => (
-            <UniversityCard
-              key={uni.id}
-              university={uni}
-              onClick={() => navigate(`/past-merits/${uni.slug}`)}
-            />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          {universities.filter(u => semiGovtUniversities.some(pu => pu.id === u.id)).map(uni => (
+            <Tilt key={uni.id} tiltMaxAngleX={12} tiltMaxAngleY={12} scale={1.03} transitionSpeed={2000}>
+              <UniversityCard
+                university={uni}
+                onClick={() => navigate(`/past-merits/${uni.slug}`)}
+              />
+            </Tilt>
           ))}
         </div>
       </div>

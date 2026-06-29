@@ -6,6 +6,10 @@ import { Link } from 'react-router-dom';
 import EduAnimation from '../components/EduAnimation';
 import Tilt from 'react-parallax-tilt';
 import { getAnalyticsSummary } from '../lib/telemetry';
+import { migrateUniversitiesToCloud } from '../lib/migrateData';
+import { db } from '../lib/firebase';
+import { collection, getDocs, deleteDoc, doc, updateDoc, addDoc } from 'firebase/firestore';
+import { useDataStore } from '../store/useDataStore';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   BarChart, Bar, Legend
@@ -42,58 +46,104 @@ export default function AdminPortal() {
   const [dateValue, setDateValue] = useState('');
   const [dateUni, setDateUni] = useState('');
   const [formSuccess, setFormSuccess] = useState('');
+  
+  const { universities, fetchData } = useDataStore();
+  const [editingUni, setEditingUni] = useState(null);
+  const [editFormula, setEditFormula] = useState({ matric: 0, fsc: 0, test: 0 });
 
   useEffect(() => {
     if (isAdmin) {
       loadAdminData();
-      setAnalytics(getAnalyticsSummary());
-      const interval = setInterval(() => {
-        setAnalytics(getAnalyticsSummary());
-      }, 3000);
+      
+      const fetchAnalytics = async () => {
+        const data = await getAnalyticsSummary();
+        if (data) setAnalytics(data);
+      };
+      
+      fetchAnalytics();
+      const interval = setInterval(fetchAnalytics, 15000); // 15 seconds to reduce Firebase reads
       return () => clearInterval(interval);
     }
   }, [user]);
 
-  const loadAdminData = () => {
-    // Registered Users
-    const uMap = JSON.parse(localStorage.getItem('dakhala-mock-users') || '{}');
-    setUsersList(Object.values(uMap));
+  const loadAdminData = async () => {
+    if (!db) return;
+    try {
+      // Registered Users from Firestore
+      const usersSnap = await getDocs(collection(db, 'users'));
+      const users = usersSnap.docs.map(doc => doc.data());
+      setUsersList(users);
 
-    // Saved Scorecards
-    const calcs = JSON.parse(localStorage.getItem('dakhala-saved-aggregates') || '[]');
-    setCalcCount(calcs.length);
+      // Total Calculations
+      const calcsSnap = await getDocs(collection(db, 'analytics_calcs'));
+      setCalcCount(calcsSnap.size);
+    } catch (e) {
+      console.error("Failed to load admin data", e);
+    }
   };
 
-  const deleteUser = (email) => {
+  const deleteUser = async (email) => {
     if (email === 'wuhs.official@gmail.com') return; // Cannot delete admin
-    const uMap = JSON.parse(localStorage.getItem('dakhala-mock-users') || '{}');
-    delete uMap[email.toLowerCase()];
-    localStorage.setItem('dakhala-mock-users', JSON.stringify(uMap));
-    setUsersList(Object.values(uMap));
+    if (!db) return;
+    try {
+      await deleteDoc(doc(db, 'users', email.toLowerCase()));
+      setUsersList(usersList.filter(u => u.email !== email.toLowerCase()));
+    } catch (e) {
+      console.error("Failed to delete user", e);
+    }
   };
 
-  const handleAddDate = (e) => {
+  const handleAddDate = async (e) => {
     e.preventDefault();
-    if (!dateTitle || !dateValue || !dateUni) return;
+    if (!dateTitle || !dateValue || !dateUni || !db) return;
 
-    // Load current mock schedules
-    const storageKey = dateType === 'apply' ? 'dakhala-mock-apply-dates' : 'dakhala-mock-test-dates';
-    const dates = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    
-    const newDate = {
-      id: Date.now().toString(),
-      title: dateTitle,
-      uni: dateUni,
-      date: new Date(dateValue).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      link: '#'
-    };
+    try {
+      const newDate = {
+        title: dateTitle,
+        uni: dateUni,
+        type: dateType, // 'apply' or 'test'
+        date: new Date(dateValue).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        link: '#'
+      };
 
-    localStorage.setItem(storageKey, JSON.stringify([newDate, ...dates]));
-    setDateTitle('');
-    setDateUni('');
-    setDateValue('');
-    setFormSuccess('Important date added successfully!');
-    setTimeout(() => setFormSuccess(''), 3000);
+      await addDoc(collection(db, 'important_dates'), newDate);
+      
+      setDateTitle('');
+      setDateUni('');
+      setDateValue('');
+      setFormSuccess('Important date added successfully to Cloud!');
+      setTimeout(() => setFormSuccess(''), 3000);
+      await fetchData(); // Refresh the store
+    } catch (error) {
+      console.error("Error adding date", error);
+    }
+  };
+
+  const handleMigrate = async () => {
+    await migrateUniversitiesToCloud();
+    await fetchData(); // Refresh the store after migrating
+  };
+
+  const startEdit = (uni) => {
+    setEditingUni(uni.id);
+    setEditFormula(uni.formula || { matric: 0, fsc: 0, test: 0 });
+  };
+
+  const saveFormula = async (uni) => {
+    if (!db) return;
+    try {
+      await updateDoc(doc(db, 'universities', uni.id), {
+        formula: {
+          matric: Number(editFormula.matric),
+          fsc: Number(editFormula.fsc),
+          test: Number(editFormula.test)
+        }
+      });
+      setEditingUni(null);
+      await fetchData(); // Refresh UI with new data
+    } catch (e) {
+      console.error("Failed to update formula", e);
+    }
   };
 
   if (!isAdmin) {
@@ -213,6 +263,12 @@ export default function AdminPortal() {
               className={`flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${activeSubTab === 'formulas' ? 'bg-gold text-white shadow-md' : 'text-muted hover:text-ink dark:hover:text-white'}`}
             >
               <Settings className="w-4 h-4" /> Formula Ed
+            </button>
+            <button
+              onClick={handleMigrate}
+              className={`flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-rose-500 hover:bg-rose-500/10`}
+            >
+              <Database className="w-4 h-4" /> Migrate
             </button>
           </div>
 
@@ -508,50 +564,51 @@ export default function AdminPortal() {
             </div>
           )}
 
-          {/* TAB 3: FORMULA EDITOR */}
+          {/* TAB 3: FORMULA EDITOR (DYNAMIC CMS) */}
           {activeSubTab === 'formulas' && (
             <div className="bg-white dark:bg-[#0C132C] border border-border dark:border-white/10 rounded-3xl p-6 shadow-sm">
-              <h3 className="text-sm font-black text-ink dark:text-white uppercase tracking-wider mb-4">Formula Coefficient Profile Manager</h3>
+              <h3 className="text-sm font-black text-ink dark:text-white uppercase tracking-wider mb-4">Dynamic University CMS</h3>
               <p className="text-xs text-muted dark:text-gray-400 mb-6 leading-relaxed">
-                Standard HEC weighting parameters are pre-programmed for calculations. Below are the current active configurations in Dakhala.
+                Update university aggregate formulas. Changes made here will instantly reflect for all students globally.
               </p>
 
-              <div className="space-y-4">
-                <div className="p-4 bg-gray-50 dark:bg-white/[0.01] border border-gray-150 dark:border-white/5 rounded-2xl flex flex-col md:flex-row justify-between gap-4">
-                  <div>
-                    <h4 className="text-xs font-black text-ink dark:text-white uppercase">Engineering Profile (NUST, UET)</h4>
-                    <p className="text-[10px] text-muted mt-1">Standard ECAT Weighting: 10% Matric, 40% FSc, 50% Test</p>
+              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                {universities.map(uni => (
+                  <div key={uni.id} className="p-4 bg-gray-50 dark:bg-white/[0.01] border border-gray-150 dark:border-white/5 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div className="flex-1">
+                      <h4 className="text-xs font-black text-ink dark:text-white uppercase">{uni.name} ({uni.shortName})</h4>
+                      <p className="text-[10px] text-muted mt-1">{uni.city} • {uni.entryTestTypes?.join(', ')}</p>
+                    </div>
+                    
+                    {editingUni === uni.id ? (
+                      <div className="flex items-center gap-2">
+                        <div className="flex flex-col items-center">
+                          <label className="text-[9px] text-muted">Matric</label>
+                          <input type="number" className="w-12 p-1 text-center bg-white dark:bg-gray-800 border rounded text-xs" value={editFormula.matric} onChange={e => setEditFormula({...editFormula, matric: e.target.value})} />
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <label className="text-[9px] text-muted">FSc</label>
+                          <input type="number" className="w-12 p-1 text-center bg-white dark:bg-gray-800 border rounded text-xs" value={editFormula.fsc} onChange={e => setEditFormula({...editFormula, fsc: e.target.value})} />
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <label className="text-[9px] text-muted">Test</label>
+                          <input type="number" className="w-12 p-1 text-center bg-white dark:bg-gray-800 border rounded text-xs" value={editFormula.test} onChange={e => setEditFormula({...editFormula, test: e.target.value})} />
+                        </div>
+                        <button onClick={() => saveFormula(uni)} className="ml-2 px-3 py-1.5 bg-emerald-500 text-white text-[10px] font-bold rounded-lg hover:bg-emerald-600">Save</button>
+                        <button onClick={() => setEditingUni(null)} className="px-3 py-1.5 bg-gray-300 text-gray-700 text-[10px] font-bold rounded-lg hover:bg-gray-400">Cancel</button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-4">
+                        <div className="flex gap-2">
+                          <span className="px-2.5 py-1 bg-cloudy dark:bg-white/5 text-ink dark:text-white text-[10px] font-bold rounded-lg">M: {uni.formula?.matric || 0}%</span>
+                          <span className="px-2.5 py-1 bg-cloudy dark:bg-white/5 text-ink dark:text-white text-[10px] font-bold rounded-lg">F: {uni.formula?.fsc || 0}%</span>
+                          <span className="px-2.5 py-1 bg-cloudy dark:bg-white/5 text-ink dark:text-white text-[10px] font-bold rounded-lg">T: {uni.formula?.test || 0}%</span>
+                        </div>
+                        <button onClick={() => startEdit(uni)} className="px-3 py-1.5 bg-gold/10 text-goldDark text-[10px] font-bold rounded-lg hover:bg-gold/20">Edit</button>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex gap-2">
-                    <span className="px-2.5 py-1 bg-blue-500/15 text-blue-600 dark:text-blue-400 text-xs font-black rounded-lg">M: 10%</span>
-                    <span className="px-2.5 py-1 bg-blue-500/15 text-blue-600 dark:text-blue-400 text-xs font-black rounded-lg">F: 40%</span>
-                    <span className="px-2.5 py-1 bg-blue-500/15 text-blue-600 dark:text-blue-400 text-xs font-black rounded-lg">T: 50%</span>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-gray-50 dark:bg-white/[0.01] border border-gray-150 dark:border-white/5 rounded-2xl flex flex-col md:flex-row justify-between gap-4">
-                  <div>
-                    <h4 className="text-xs font-black text-ink dark:text-white uppercase">Computing & Business (FAST, LUMS)</h4>
-                    <p className="text-[10px] text-muted mt-1">Standard BCAT Weighting: 50% FSc, 50% Test (or Matric options)</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="px-2.5 py-1 bg-gold/15 text-goldDark text-xs font-black rounded-lg">M: 0%</span>
-                    <span className="px-2.5 py-1 bg-gold/15 text-goldDark text-xs font-black rounded-lg">F: 50%</span>
-                    <span className="px-2.5 py-1 bg-gold/15 text-goldDark text-xs font-black rounded-lg">T: 50%</span>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-gray-50 dark:bg-white/[0.01] border border-gray-150 dark:border-white/5 rounded-2xl flex flex-col md:flex-row justify-between gap-4">
-                  <div>
-                    <h4 className="text-xs font-black text-ink dark:text-white uppercase">Medical Colleges (MDCAT PMDC)</h4>
-                    <p className="text-[10px] text-muted mt-1">PMDC Standard Weighting: 10% Matric, 40% FSc, 50% MDCAT</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="px-2.5 py-1 bg-purple-500/15 text-purple-600 dark:text-purple-400 text-xs font-black rounded-lg">M: 10%</span>
-                    <span className="px-2.5 py-1 bg-purple-500/15 text-purple-600 dark:text-purple-400 text-xs font-black rounded-lg">F: 40%</span>
-                    <span className="px-2.5 py-1 bg-purple-500/15 text-purple-600 dark:text-purple-400 text-xs font-black rounded-lg">T: 50%</span>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           )}

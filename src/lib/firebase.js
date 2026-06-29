@@ -8,6 +8,7 @@ import {
   signInWithEmailAndPassword,
   onAuthStateChanged as firebaseOnAuthStateChanged
 } from 'firebase/auth';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -18,166 +19,93 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Check if keys exist in environment
 const isFirebaseConfigured = !!(firebaseConfig.apiKey && firebaseConfig.apiKey !== 'YOUR_API_KEY');
 
-const app = isFirebaseConfigured ? initializeApp(firebaseConfig) : null;
-const realAuth = app ? getAuth(app) : null;
-
-// Export auth (will be a mock placeholder if not configured)
-export const auth = realAuth || { name: 'mock-auth-instance' };
-export const googleProvider = new GoogleAuthProvider();
-
-// Mock User Database & State in LocalStorage
-const getMockUsers = () => {
-  const users = localStorage.getItem('dakhala-mock-users');
-  const userMap = users ? JSON.parse(users) : {};
-  // Always ensure the admin account is seeded
-  if (!userMap['wuhs.official@gmail.com']) {
-    userMap['wuhs.official@gmail.com'] = {
-      email: 'wuhs.official@gmail.com',
-      password: 'kite00786',
-      displayName: 'WUHS Admin',
-      photoURL: 'https://ui-avatars.com/api/?name=WUHS+Admin&background=0D8ABC&color=fff'
-    };
-    localStorage.setItem('dakhala-mock-users', JSON.stringify(userMap));
-  }
-  return userMap;
-};
-
-// Seed initial users
-getMockUsers();
-
-let currentMockUser = null;
-try {
-  const savedUser = localStorage.getItem('dakhala-mock-current-user');
-  if (savedUser) {
-    currentMockUser = JSON.parse(savedUser);
-  }
-} catch (e) {
-  console.error("Error reading saved mock user", e);
+if (!isFirebaseConfigured) {
+  console.error("Firebase is not configured. Please check your .env variables.");
 }
 
-const mockListeners = [];
+const app = isFirebaseConfigured ? initializeApp(firebaseConfig) : null;
+export const auth = app ? getAuth(app) : null;
+export const db = app ? getFirestore(app) : null;
+export const googleProvider = new GoogleAuthProvider();
 
-const notifyMockListeners = () => {
-  mockListeners.forEach(callback => callback(currentMockUser));
+// Helper to save user profile to Firestore
+const saveUserToFirestore = async (user) => {
+  if (!db || !user) return;
+  try {
+    const userRef = doc(db, 'users', user.email.toLowerCase());
+    await setDoc(userRef, {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || user.email.split('@')[0],
+      photoURL: user.photoURL || `https://ui-avatars.com/api/?name=${user.email.split('@')[0]}&background=random`,
+      lastLogin: new Date().toISOString()
+    }, { merge: true });
+  } catch (error) {
+    console.error("Error saving user to Firestore", error);
+  }
 };
 
 export const onAuthStateChanged = (authInstance, callback) => {
-  if (isFirebaseConfigured && realAuth) {
-    return firebaseOnAuthStateChanged(realAuth, callback);
+  if (isFirebaseConfigured && authInstance) {
+    return firebaseOnAuthStateChanged(authInstance, async (user) => {
+      if (user) {
+        await saveUserToFirestore(user);
+      }
+      callback(user);
+    });
   }
   
-  mockListeners.push(callback);
-  // Immediate trigger with current state
-  callback(currentMockUser);
-  
-  return () => {
-    const idx = mockListeners.indexOf(callback);
-    if (idx > -1) {
-      mockListeners.splice(idx, 1);
-    }
-  };
+  // Return a dummy unsubscribe function if not configured
+  return () => {};
 };
 
 export const signInWithGoogle = async () => {
-  if (isFirebaseConfigured && realAuth) {
-    try {
-      const result = await signInWithPopup(realAuth, googleProvider);
-      return result.user;
-    } catch (error) {
-      console.error("Error signing in with Google", error);
-      throw error;
-    }
+  if (!isFirebaseConfigured || !auth) {
+    throw new Error("Firebase is not configured yet. Please add your credentials to .env.local");
   }
-
-  // Mock Google sign-in
-  currentMockUser = {
-    uid: 'google-mock-uid-' + Math.random().toString(36).substr(2, 9),
-    email: 'google.student@gmail.com',
-    displayName: 'Google Mock Student',
-    photoURL: 'https://ui-avatars.com/api/?name=Google+Student&background=random'
-  };
-  localStorage.setItem('dakhala-mock-current-user', JSON.stringify(currentMockUser));
-  notifyMockListeners();
-  return currentMockUser;
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    await saveUserToFirestore(result.user);
+    return result.user;
+  } catch (error) {
+    console.error("Error signing in with Google", error);
+    throw error;
+  }
 };
 
 export const registerWithEmail = async (email, password) => {
-  if (isFirebaseConfigured && realAuth) {
-    try {
-      const result = await createUserWithEmailAndPassword(realAuth, email, password);
-      return result.user;
-    } catch (error) {
-      console.error("Error registering with email", error);
-      throw error;
-    }
+  if (!isFirebaseConfigured || !auth) {
+    throw new Error("Firebase is not configured yet. Please add your credentials to .env.local");
   }
-
-  // Mock Email registration
-  const users = getMockUsers();
-  if (users[email.toLowerCase()]) {
-    throw new Error("Email already in use.");
+  try {
+    const result = await createUserWithEmailAndPassword(auth, email, password);
+    await saveUserToFirestore(result.user);
+    return result.user;
+  } catch (error) {
+    console.error("Error registering with email", error);
+    throw error;
   }
-
-  const newUser = {
-    email: email.toLowerCase(),
-    password: password, // In production we would hash this, but this is a local sandbox fallback
-    displayName: email.split('@')[0],
-    photoURL: `https://ui-avatars.com/api/?name=${email.split('@')[0]}&background=random`
-  };
-
-  users[email.toLowerCase()] = newUser;
-  localStorage.setItem('dakhala-mock-users', JSON.stringify(users));
-
-  currentMockUser = {
-    uid: 'mock-uid-' + Math.random().toString(36).substr(2, 9),
-    email: newUser.email,
-    displayName: newUser.displayName,
-    photoURL: newUser.photoURL
-  };
-  localStorage.setItem('dakhala-mock-current-user', JSON.stringify(currentMockUser));
-  notifyMockListeners();
-  return currentMockUser;
 };
 
 export const loginWithEmail = async (email, password) => {
-  if (isFirebaseConfigured && realAuth) {
-    try {
-      const result = await signInWithEmailAndPassword(realAuth, email, password);
-      return result.user;
-    } catch (error) {
-      console.error("Error signing in with email", error);
-      throw error;
-    }
+  if (!isFirebaseConfigured || !auth) {
+    throw new Error("Firebase is not configured yet. Please add your credentials to .env.local");
   }
-
-  // Mock Email login
-  const users = getMockUsers();
-  const matchedUser = users[email.toLowerCase()];
-
-  if (!matchedUser || matchedUser.password !== password) {
-    throw new Error("Invalid email or password.");
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    await saveUserToFirestore(result.user);
+    return result.user;
+  } catch (error) {
+    console.error("Error signing in with email", error);
+    throw error;
   }
-
-  currentMockUser = {
-    uid: 'mock-uid-' + matchedUser.email,
-    email: matchedUser.email,
-    displayName: matchedUser.displayName,
-    photoURL: matchedUser.photoURL
-  };
-  localStorage.setItem('dakhala-mock-current-user', JSON.stringify(currentMockUser));
-  notifyMockListeners();
-  return currentMockUser;
 };
 
 export const logout = async () => {
-  if (isFirebaseConfigured && realAuth) {
-    return firebaseSignOut(realAuth);
+  if (!isFirebaseConfigured || !auth) {
+    return;
   }
-  
-  currentMockUser = null;
-  localStorage.removeItem('dakhala-mock-current-user');
-  notifyMockListeners();
+  return firebaseSignOut(auth);
 };

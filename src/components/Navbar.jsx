@@ -3,6 +3,9 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { publicUniversities, privateUniversities, semiGovtUniversities } from '../data/universities';
 import { Share2, Check } from 'lucide-react';
 import { logAction } from '../lib/telemetry';
+import { useAuthStore } from '../store/useAuthStore';
+import { useAdminMode } from '../store/useAdminMode';
+import { Settings, BarChart3 } from 'lucide-react';
 
 // Clean inline SVG components for chevron icons
 function ChevronDownIcon({ isOpen }) {
@@ -43,6 +46,9 @@ export default function Navbar() {
   const [mobileActiveSector, setMobileActiveSector] = useState(null);
 
   const [shareCopied, setShareCopied] = useState(false);
+
+  const { isAdmin } = useAuthStore();
+  const { isEditing, toggleEditing } = useAdminMode();
 
   const handleShareWebsite = (e) => {
     e.preventDefault();
@@ -867,8 +873,34 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Right Section for Share Button */}
+          {/* Right Section */}
           <div className="flex items-center space-x-3 z-10">
+            {isAdmin && (
+              <>
+                <button
+                  onClick={() => navigate('/admin-portal')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm hover:bg-blue-500/20"
+                  title="Analytics & Logs"
+                >
+                  <BarChart3 className="w-3.5 h-3.5" />
+                  <span>Analytics</span>
+                </button>
+                <div className="flex items-center bg-gray-100 dark:bg-white/5 rounded-xl border border-border/50 dark:border-white/10 p-1">
+                  <span className="text-[9px] font-bold text-muted uppercase px-2 mr-1">Edit Mode:</span>
+                  <button
+                    onClick={toggleEditing}
+                    className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                      isEditing 
+                        ? 'bg-rose-500 text-white shadow-sm' 
+                        : 'text-muted hover:bg-gray-200 dark:hover:bg-white/10'
+                    }`}
+                  >
+                    {isEditing ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+                <div className="w-px h-6 bg-border dark:bg-white/10 mx-1"></div>
+              </>
+            )}
             <button
               onClick={handleShareWebsite}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 dark:bg-white/5 hover:bg-gold/15 text-ink dark:text-white hover:text-goldDark border border-border/50 dark:border-white/10 rounded-xl text-xs font-black uppercase tracking-wider transition-all relative shadow-sm"
