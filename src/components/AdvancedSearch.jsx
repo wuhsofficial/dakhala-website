@@ -108,7 +108,7 @@ export default function AdvancedSearch() {
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             onKeyDown={handleKeyDown}
             placeholder="Type anything... e.g., Software Engineering under 80% aggregate"
-            className="flex-1 w-full min-h-[60px] max-h-[120px] bg-transparent resize-none outline-none py-3 px-4 text-ink text-lg font-medium placeholder-ink/30"
+            className="flex-1 w-full min-h-[110px] sm:min-h-[60px] max-h-[120px] bg-transparent resize-none outline-none py-3 px-4 text-ink text-lg font-medium placeholder-ink/30"
             style={{ overflowY: query.length > 100 ? 'auto' : 'hidden' }}
             disabled={isSearching}
           />

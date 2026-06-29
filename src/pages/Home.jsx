@@ -209,7 +209,13 @@ export default function Home() {
       </motion.div>
 
       {/* Dual Scrolling Logo Marquees of Universities */}
-      <div className="relative z-10 py-6 overflow-hidden flex flex-col space-y-4">
+      <div 
+        className="relative z-10 py-6 overflow-hidden flex flex-col space-y-4"
+        style={{ 
+          WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)', 
+          maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)' 
+        }}
+      >
         {/* Track 1: LTR */}
         <div className="relative flex overflow-x-hidden py-2 select-none">
           <div className="animate-marquee-ltr flex space-x-4 whitespace-nowrap">
