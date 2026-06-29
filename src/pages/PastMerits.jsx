@@ -79,20 +79,26 @@ export default function PastMerits() {
       );
     }
 
-    // Resolve campus-specific programs
-    const campusMeritData = uni.meritData?.campuses?.[selectedCampus];
-    let activePrograms = [];
-    if (campusMeritData && Object.keys(campusMeritData).length > 0) {
-      activePrograms = Object.entries(campusMeritData).map(([progName, yearsData]) => {
-        const meritsObj = {};
-        Object.entries(yearsData).forEach(([yr, val]) => {
-          meritsObj[yr] = typeof val === 'string' ? parseFloat(val.replace('%', '')) : val;
-        });
-        return { name: progName, merits: meritsObj };
+    // Merge campus-specific merits with generic fallback programs
+    const campusMeritData = uni.meritData?.campuses?.[selectedCampus] || {};
+    const programNames = new Set((uni.programs || []).map(p => p.name));
+    Object.keys(campusMeritData).forEach(progName => programNames.add(progName));
+
+    let activePrograms = Array.from(programNames).map(progName => {
+      const fallbackProg = (uni.programs || []).find(p => p.name === progName);
+      const fallbackMerits = fallbackProg ? fallbackProg.merits : {};
+      const campusMerits = campusMeritData[progName] || {};
+      
+      const mergedMerits = { ...fallbackMerits };
+      Object.entries(campusMerits).forEach(([yr, val]) => {
+         if (val === null) {
+           mergedMerits[yr] = null;
+         } else {
+           mergedMerits[yr] = typeof val === 'string' ? parseFloat(val.replace('%', '')) : val;
+         }
       });
-    } else {
-      activePrograms = uni.programs || [];
-    }
+      return { name: progName, merits: mergedMerits };
+    });
 
     const filteredPrograms = selectedProgram === 'All' 
       ? activePrograms 
@@ -101,22 +107,27 @@ export default function PastMerits() {
     const years = [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
 
     const handleSaveMerit = (progName, year, val) => {
-      const campusMeritData = uni.meritData?.campuses?.[selectedCampus];
-      if (campusMeritData && Object.keys(campusMeritData).length > 0) {
-        const newMeritData = JSON.parse(JSON.stringify(uni.meritData));
-        if (!newMeritData.campuses[selectedCampus][progName]) {
-          newMeritData.campuses[selectedCampus][progName] = {};
-        }
+      if (selectedCampus) {
+        // Save specifically to this campus
+        const newMeritData = JSON.parse(JSON.stringify(uni.meritData || { type: 'aggregate', campuses: {} }));
+        if (!newMeritData.campuses) newMeritData.campuses = {};
+        if (!newMeritData.campuses[selectedCampus]) newMeritData.campuses[selectedCampus] = {};
+        if (!newMeritData.campuses[selectedCampus][progName]) newMeritData.campuses[selectedCampus][progName] = {};
+        
         newMeritData.campuses[selectedCampus][progName][year] = val === '' ? null : Number(val);
         updateUniversity(uni.id, { meritData: newMeritData });
       } else {
+        // Save to global programs fallback
         const newPrograms = JSON.parse(JSON.stringify(uni.programs || []));
         const progIndex = newPrograms.findIndex(p => p.name === progName);
+        
         if (progIndex !== -1) {
           if (!newPrograms[progIndex].merits) newPrograms[progIndex].merits = {};
           newPrograms[progIndex].merits[year] = val === '' ? null : Number(val);
-          updateUniversity(uni.id, { programs: newPrograms });
+        } else {
+          newPrograms.push({ name: progName, merits: { [year]: val === '' ? null : Number(val) } });
         }
+        updateUniversity(uni.id, { programs: newPrograms });
       }
     };
 
