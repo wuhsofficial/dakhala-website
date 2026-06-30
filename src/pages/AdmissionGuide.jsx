@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ExternalLink } from 'lucide-react';
 import Tilt from 'react-parallax-tilt';
@@ -59,6 +60,10 @@ export default function AdmissionGuide() {
 
     return (
       <div className="py-6 flex flex-col space-y-6 text-sm md:text-base">
+        <Helmet>
+          <title>{uni.name} Admission Guide 2026 | Dakhala</title>
+          <meta name="description" content={`Complete admission guide for ${uni.name}. Check eligibility, fee structure, hostel details, and how to apply for 2026 admissions.`} />
+        </Helmet>
         {/* Back Button */}
         <div>
           <button
@@ -214,6 +219,10 @@ Email: admissions@${uni.id}.edu.pk`}
   // LANDING PAGE
   return (
     <div className="py-6 flex flex-col space-y-8 text-[13px]">
+      <Helmet>
+        <title>University Admission Guides 2026 | Dakhala</title>
+        <meta name="description" content="Comprehensive admission guides for top universities in Pakistan including NUST, FAST, LUMS, GIKI, UET, and more. Find eligibility, fee structures, and application procedures." />
+      </Helmet>
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 max-w-2xl mx-auto w-full text-center md:text-left relative z-10 select-none">
         <div className="space-y-2 flex-1">
           <h2 className="text-xl md:text-2xl font-extrabold text-ink dark:text-white uppercase tracking-wide">Admission Guides</h2>

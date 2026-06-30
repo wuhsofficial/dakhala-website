@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { BrainCircuit, Database, Network, Target, ChevronRight } from 'lucide-react';
 import nlp from 'compromise';
@@ -57,6 +58,10 @@ export default function Search() {
 
   return (
     <div className="py-10 max-w-[1280px] mx-auto min-h-[60vh] text-ink dark:text-white px-4">
+      <Helmet>
+        <title>{query ? `Search: ${query} | Dakhala` : 'Search Universities | Dakhala'}</title>
+        <meta name="description" content="Search for universities, programs, and admission criteria across Pakistan using our advanced semantic search engine." />
+      </Helmet>
       <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white dark:bg-[#0C132C] border border-border dark:border-white/10 p-6 rounded-3xl relative overflow-hidden shadow-sm">
         <div className="absolute right-0 top-0 w-48 h-48 bg-gold/5 rounded-full blur-2xl pointer-events-none" />
         <div className="relative z-10">

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { allUniversities, getUniversityLogo } from '../data/universities';
 import { motion } from 'framer-motion';
 import Tilt from 'react-parallax-tilt';
@@ -107,6 +108,10 @@ export default function Compare() {
       animate={{ opacity: 1 }}
       className="py-10 flex flex-col space-y-8 select-none"
     >
+      <Helmet>
+        <title>Compare Universities | Dakhala</title>
+        <meta name="description" content="Compare tuition fees, admission merit cutoffs, and entry tests for top Pakistani universities side-by-side using our advanced university comparison matrix." />
+      </Helmet>
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 max-w-4xl mx-auto w-full text-center md:text-left relative">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-gold/10 rounded-full blur-3xl -z-10" />
         <div className="space-y-2 flex-1">
