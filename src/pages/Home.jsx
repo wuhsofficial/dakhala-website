@@ -28,7 +28,10 @@ import SpotlightCard from '../components/SpotlightCard';
 
 export default function Home() {
   const navigate = useNavigate();
-  const marqueeUniversities = allUniversities.filter(u => u.id !== 'dha-suffa');
+  const allMarqueeUniversities = allUniversities.filter(u => u.id !== 'dha-suffa');
+  const midPoint = Math.ceil(allMarqueeUniversities.length / 2);
+  const marqueeRow1 = allMarqueeUniversities.slice(0, midPoint);
+  const marqueeRow2 = allMarqueeUniversities.slice(midPoint);
   // Selected default font is Gamilia
 
   // Quick Calculator State
@@ -219,7 +222,7 @@ export default function Home() {
         {/* Track 1: LTR */}
         <div className="relative flex overflow-x-hidden py-2 select-none">
           <div className="animate-marquee-ltr flex space-x-4 whitespace-nowrap">
-            {[...marqueeUniversities, ...marqueeUniversities].map((uni, idx) => (
+            {[...marqueeRow1, ...marqueeRow1].map((uni, idx) => (
               <div 
                 key={`ltr-${uni.id}-${idx}`} 
                 onClick={() => navigate(`/calculator/university/${uni.slug}`)}
@@ -245,7 +248,7 @@ export default function Home() {
         {/* Track 2: RTL */}
         <div className="relative flex overflow-x-hidden py-2 select-none">
           <div className="animate-marquee-rtl flex space-x-4 whitespace-nowrap">
-            {[...marqueeUniversities, ...marqueeUniversities].reverse().map((uni, idx) => (
+            {[...marqueeRow2, ...marqueeRow2].map((uni, idx) => (
               <div 
                 key={`rtl-${uni.id}-${idx}`} 
                 onClick={() => navigate(`/calculator/university/${uni.slug}`)}

@@ -1531,7 +1531,7 @@ export const allCategories = ["all", "engineering", "cs", "medical", "business",
 
 export const getUniversityLogo = (uniId) => {
   const logoMap = {
-    'nust': 'nust',
+    'nust': 'nust.webp',
     'uet-lahore': 'uet.webp',
     'uet-taxila': 'uet.webp',
     'qau': 'qau.webp',
@@ -1554,7 +1554,7 @@ export const getUniversityLogo = (uniId) => {
     'bnu': 'bnu.webp',
     'cust': 'cust.webp',
     'ucp': 'ucp.webp',
-    'umt': 'umt',
+    'umt': 'umt.webp',
     'superior': 'superior.webp',
     'dsu': 'dha suffa.webp',
     'riphah': 'riphah.webp',
@@ -1573,5 +1573,5 @@ export const getUniversityLogo = (uniId) => {
   };
   
   const filename = logoMap[uniId.toLowerCase()];
-  return filename ? `/logos/${filename}` : `/logos/${uniId}.webp`;
+  return filename ? `/logos/${filename}?v=2` : `/logos/${uniId}.webp?v=2`;
 };
