@@ -1564,7 +1564,7 @@ export const getUniversityLogo = (uniId) => {
     'numl': 'numl.webp',
     'nums': 'nums.webp',
     'foundation': 'foundation university.webp',
-    'amc': 'army medical college(AMC).webp',
+    'amc': 'amc.gif',
     'bahria': 'behria university.webp',
     'behria': 'behria university.webp',
     'szabist': 'szabist.webp',
