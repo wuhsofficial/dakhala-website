@@ -36,10 +36,10 @@ export default function Compare() {
     setSelectedUnis(selectedUnis.filter(u => u.id !== id));
   };
 
-  const filteredUnis = allUniversities.filter(uni => 
+  const filteredUnis = allUniversities.filter(uni =>
     !selectedUnis.some(selected => selected.id === uni.id) &&
-    (uni.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-     uni.shortName.toLowerCase().includes(searchQuery.toLowerCase()))
+    (uni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      uni.shortName.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const getMockRanking = (uniId) => {
@@ -86,7 +86,7 @@ export default function Compare() {
       selectedUnis.forEach(uni => {
         // Generate pseudo-random deterministic scores based on university slug length/chars
         let score = 50 + ((uni.id.length * 5) % 40) + ((metric.length * 3) % 20);
-        
+
         // Manual overrides for realism
         if (metric === 'Affordability' && getSectorType(uni) === 'Private') score -= 30;
         if (metric === 'Affordability' && getSectorType(uni) === 'Public') score += 20;
@@ -103,7 +103,7 @@ export default function Compare() {
   const colors = ['#D4AF37', '#0F172A', '#10B981']; // Gold, Ink, Green
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="py-10 flex flex-col space-y-8 select-none"
@@ -126,13 +126,13 @@ export default function Compare() {
         <label className="block text-xs font-extrabold text-ink dark:text-white uppercase mb-3 flex items-center gap-2">
           <Info className="w-4 h-4 text-gold" /> Search & Add University (Max 3)
         </label>
-        
+
         <div className="flex flex-wrap gap-3 mb-4">
           {selectedUnis.map((uni, idx) => (
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              key={uni.id} 
+              key={uni.id}
               className="flex items-center gap-2 px-4 py-2 bg-ink text-white rounded-xl text-xs font-bold shadow-md border border-white/10"
               style={{ borderLeft: `4px solid ${colors[idx]}` }}
             >
@@ -188,7 +188,7 @@ export default function Compare() {
 
       {selectedUnis.length > 0 ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* Admissions Probability Panel */}
           <div className="lg:col-span-1">
             <Tilt tiltMaxAngleX={6} tiltMaxAngleY={6} scale={1.02} transitionSpeed={2000} className="h-full">
@@ -196,91 +196,91 @@ export default function Compare() {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-ink/5 rounded-full blur-2xl pointer-events-none" />
                 <h3 className="font-extrabold text-ink dark:text-white text-lg mb-1">Admissions Probability Analyzer</h3>
                 <p className="text-[11px] text-muted dark:text-gray-400 font-medium mb-6">Estimate your chances based on target aggregate scores.</p>
-                
+
                 {/* Target Aggregate Slider */}
                 <div className="mb-6 bg-cloudy dark:bg-white/[0.02] p-4 rounded-2xl border border-border/50 dark:border-white/5">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs font-bold text-ink dark:text-white">Target Aggregate Score:</span>
                     <span className="text-lg font-black text-gold">{targetAggregate.toFixed(1)}%</span>
                   </div>
-              <input
-                type="range"
-                min="50"
-                max="100"
-                step="0.5"
-                value={targetAggregate}
-                onChange={(e) => setTargetAggregate(parseFloat(e.target.value))}
-                className="w-full h-1.5 bg-border rounded-lg appearance-none cursor-pointer accent-gold focus:outline-none"
-              />
-              <div className="flex justify-between text-[10px] text-muted font-bold mt-1">
-                <span>50%</span>
-                <span>75%</span>
-                <span>100%</span>
-              </div>
-            </div>
-
-            {/* Probability Lists */}
-            <div className="space-y-6 flex-1 overflow-y-auto max-h-[350px] no-scrollbar pr-1">
-              {selectedUnis.map((uni, idx) => (
-                <div key={uni.id} className="space-y-3">
-                  <div className="flex items-center gap-2 border-b border-border dark:border-white/10 pb-1">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: colors[idx] }} />
-                    <img 
-                      src={getUniversityLogo(uni.id)} 
-                      alt={`${uni.shortName} Logo`} 
-                      className="w-5 h-5 object-contain bg-white rounded p-0.5 border border-border/40"
-                    />
-                    <h4 className="font-extrabold text-xs text-ink dark:text-white uppercase tracking-wider">{uni.shortName}</h4>
-                  </div>
-                  <div className="space-y-2.5">
-                    {uni.programs.slice(0, 3).map(p => {
-                      const cutoff = p.merits[2025] || 70.0;
-                      const prob = 1 / (1 + Math.exp(-0.8 * (targetAggregate - cutoff)));
-                      const probPercent = Math.round(prob * 100);
-                      
-                      let barColor = "bg-rose-500";
-                      let textColor = "text-rose-600";
-                      let statusText = "Reach";
-                      
-                      if (probPercent >= 80) {
-                        barColor = "bg-emerald-500";
-                        textColor = "text-emerald-600";
-                        statusText = "Safe";
-                      } else if (probPercent >= 40) {
-                        barColor = "bg-amber-500";
-                        textColor = "text-amber-600";
-                        statusText = "Match";
-                      }
-                      
-                      return (
-                        <div key={p.name} className="text-xs space-y-1">
-                          <div className="flex justify-between font-bold text-ink dark:text-white">
-                            <span className="truncate max-w-[140px]">{p.name}</span>
-                            <span className={`${textColor}`}>{probPercent}% ({statusText})</span>
-                          </div>
-                          <div className="w-full bg-cloudy dark:bg-white/10 rounded-full h-2 overflow-hidden border border-border/30 dark:border-white/5">
-                            <motion.div 
-                              className={`h-full ${barColor}`} 
-                              animate={{ width: `${probPercent}%` }}
-                              transition={{ duration: 0.4 }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
+                  <input
+                    type="range"
+                    min="50"
+                    max="100"
+                    step="0.5"
+                    value={targetAggregate}
+                    onChange={(e) => setTargetAggregate(parseFloat(e.target.value))}
+                    className="w-full h-1.5 bg-border rounded-lg appearance-none cursor-pointer accent-gold focus:outline-none"
+                  />
+                  <div className="flex justify-between text-[10px] text-muted font-bold mt-1">
+                    <span>50%</span>
+                    <span>75%</span>
+                    <span>100%</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </Tilt>
-      </div>
 
-        {/* Detailed Matrix Table */}
+                {/* Probability Lists */}
+                <div className="space-y-6 flex-1 overflow-y-auto max-h-[350px] no-scrollbar pr-1">
+                  {selectedUnis.map((uni, idx) => (
+                    <div key={uni.id} className="space-y-3">
+                      <div className="flex items-center gap-2 border-b border-border dark:border-white/10 pb-1">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: colors[idx] }} />
+                        <img
+                          src={getUniversityLogo(uni.id)}
+                          alt={`${uni.shortName} Logo`}
+                          className="w-5 h-5 object-contain bg-white rounded p-0.5 border border-border/40"
+                        />
+                        <h4 className="font-extrabold text-xs text-ink dark:text-white uppercase tracking-wider">{uni.shortName}</h4>
+                      </div>
+                      <div className="space-y-2.5">
+                        {uni.programs.slice(0, 3).map(p => {
+                          const cutoff = p.merits[2025] || 70.0;
+                          const prob = 1 / (1 + Math.exp(-0.8 * (targetAggregate - cutoff)));
+                          const probPercent = Math.round(prob * 100);
+
+                          let barColor = "bg-rose-500";
+                          let textColor = "text-rose-600";
+                          let statusText = "Reach";
+
+                          if (probPercent >= 80) {
+                            barColor = "bg-emerald-500";
+                            textColor = "text-emerald-600";
+                            statusText = "Safe";
+                          } else if (probPercent >= 40) {
+                            barColor = "bg-amber-500";
+                            textColor = "text-amber-600";
+                            statusText = "Match";
+                          }
+
+                          return (
+                            <div key={p.name} className="text-xs space-y-1">
+                              <div className="flex justify-between font-bold text-ink dark:text-white">
+                                <span className="truncate max-w-[140px]">{p.name}</span>
+                                <span className={`${textColor}`}>{probPercent}% ({statusText})</span>
+                              </div>
+                              <div className="w-full bg-cloudy dark:bg-white/10 rounded-full h-2 overflow-hidden border border-border/30 dark:border-white/5">
+                                <motion.div
+                                  className={`h-full ${barColor}`}
+                                  animate={{ width: `${probPercent}%` }}
+                                  transition={{ duration: 0.4 }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Tilt>
+          </div>
+
+          {/* Detailed Matrix Table */}
           <div className="lg:col-span-2 bg-white dark:bg-[#0A1224] border border-border dark:border-white/10 rounded-3xl overflow-hidden shadow-xl">
             <div className="p-6 border-b border-border dark:border-white/10 bg-cloudy dark:bg-white/[0.02]">
               <h3 className="font-extrabold text-ink dark:text-white text-lg flex items-center gap-2">
-                 <ShieldAlert className="w-5 h-5 text-gold" /> Detailed Matrix
+                <ShieldAlert className="w-5 h-5 text-gold" /> Detailed Matrix
               </h3>
             </div>
             <div className="overflow-x-auto no-scrollbar">
@@ -291,8 +291,8 @@ export default function Compare() {
                     {selectedUnis.map((uni, idx) => (
                       <th key={uni.id} className="p-5 text-center">
                         <div className="flex flex-col items-center justify-center space-y-2">
-                          <img 
-                            src={getUniversityLogo(uni.id)} 
+                          <img
+                            src={getUniversityLogo(uni.id)}
                             alt={`${uni.shortName} Logo`}
                             className="w-12 h-12 object-contain bg-white rounded-lg p-1 border border-border/40 dark:border-white/10 shadow-sm"
                           />

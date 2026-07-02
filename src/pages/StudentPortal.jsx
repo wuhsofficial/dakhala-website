@@ -9,6 +9,7 @@ import {
   Calculator, Calendar, MapPin, TrendingUp, AlertCircle, Check, ShieldAlert
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getUniversityLogo } from '../data/universities';
 
 export default function StudentPortal() {
   const { user, setUser, clearUser, loading } = useAuthStore();
@@ -233,6 +234,7 @@ export default function StudentPortal() {
                     src={user.photoURL || 'https://ui-avatars.com/api/?name=' + (user.displayName || user.email)} 
                     alt="Profile" 
                     className="w-20 h-20 rounded-full border-4 border-gold shadow-md bg-white" 
+                    referrerPolicy="no-referrer"
                   />
                   <div className="absolute bottom-0 right-0 p-1 bg-green-500 rounded-full border-2 border-white dark:border-[#0C132C]" />
                 </div>
@@ -374,8 +376,12 @@ export default function StudentPortal() {
                       className="p-4 bg-white/40 dark:bg-white/[0.02] border border-border/80 dark:border-white/5 rounded-2xl flex items-center justify-between hover:border-gold/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-ink text-gold flex items-center justify-center font-black text-sm uppercase">
-                          {uni.shortName?.substring(0, 3)}
+                        <div className="w-10 h-10 rounded-xl bg-white overflow-hidden flex-shrink-0 flex items-center justify-center p-1 border border-border/30">
+                          <img 
+                            src={getUniversityLogo(uni.id)} 
+                            alt={uni.shortName} 
+                            className="w-full h-full object-contain"
+                          />
                         </div>
                         <div>
                           <h4 className="text-xs font-black text-ink dark:text-white leading-tight">{uni.name}</h4>

@@ -171,7 +171,7 @@ export default function AuthPanel({ onNavigate }) {
       ) : (
         <div className="flex flex-col space-y-6">
           <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
-            <img src={user.photoURL || 'https://ui-avatars.com/api/?name=' + user.email} alt="Profile" className="w-10 h-10 rounded-full bg-white" />
+            <img src={user.photoURL || 'https://ui-avatars.com/api/?name=' + user.email} alt="Profile" className="w-10 h-10 rounded-full bg-white" referrerPolicy="no-referrer" />
             <div className="flex flex-col overflow-hidden">
               <span className="text-sm font-semibold text-ink dark:text-cloudy truncate">{user.displayName || 'User'}</span>
               <span className="text-xs text-muted dark:text-gray-400 truncate">{user.email}</span>

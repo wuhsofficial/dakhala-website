@@ -461,7 +461,7 @@ export default function AdminPortal() {
                     {usersList.map((usr) => (
                       <tr key={usr.email} className="border-b border-gray-150 dark:border-white/[0.03] hover:bg-gray-50 dark:hover:bg-white/[0.01]">
                         <td className="p-4 flex items-center gap-3">
-                          <img src={usr.photoURL} alt="Avatar" className="w-8 h-8 rounded-full bg-white shrink-0 border border-gray-200" />
+                          <img src={usr.photoURL} alt="Avatar" className="w-8 h-8 rounded-full bg-white shrink-0 border border-gray-200" referrerPolicy="no-referrer" />
                           <div className="overflow-hidden">
                             <div className="font-bold text-ink dark:text-white truncate">{usr.displayName}</div>
                             <div className="text-[10px] text-muted truncate">{usr.email}</div>
