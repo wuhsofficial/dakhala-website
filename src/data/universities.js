@@ -1573,5 +1573,5 @@ export const getUniversityLogo = (uniId) => {
   };
   
   const filename = logoMap[uniId.toLowerCase()];
-  return filename ? `/logos/${filename}?v=2` : `/logos/${uniId}.webp?v=2`;
+  return filename ? `/logos/${filename}?v=3` : `/logos/${uniId}.webp?v=3`;
 };
