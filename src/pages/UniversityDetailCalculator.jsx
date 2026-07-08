@@ -732,6 +732,13 @@ Calculate your aggregate instantly on Dakhala:
                             });
                             return { name: progName, merits: meritsObj };
                           });
+                          
+                          if (uni.programGroups?.length > 0) {
+                            const activeGroup = uni.programGroups[selectedProgramGroup];
+                            if (activeGroup && activeGroup.programs) {
+                              programList = programList.filter(p => activeGroup.programs.includes(p.name));
+                            }
+                          }
                         } else {
                           programList = uni.programs || [];
                         }

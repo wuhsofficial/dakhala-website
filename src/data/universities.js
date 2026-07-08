@@ -829,6 +829,7 @@ export const privateUniversities = [
     programGroups: [
       {
         groupName: "Computing (CS, SE, AI, DS)",
+        programs: ["BS CS", "BS SE", "BS AI", "BS DS", "BS Cyber"],
         formulas: {
           "FSc": { matric: 10, fsc: 40, test: 50 },
           "A-Levels (Immediate)": { matric: 10, fsc: 40, test: 50 },
@@ -837,6 +838,7 @@ export const privateUniversities = [
       },
       {
         groupName: "Engineering (EE, CE, Civil)",
+        programs: ["BS EE", "BS CE", "BS Civil"],
         formulas: {
           "FSc": { matric: 17, fsc: 50, test: 33 },
           "A-Levels (Immediate)": { matric: 17, fsc: 50, test: 33 },
@@ -845,6 +847,7 @@ export const privateUniversities = [
       },
       {
         groupName: "Business (BBA, AFM)",
+        programs: ["BBA", "BS A&F", "BS Business Analytics", "BS FinTech"],
         formulas: {
           "FSc": { matric: 10, fsc: 40, test: 50 },
           "A-Levels (Immediate)": { matric: 10, fsc: 40, test: 50 },
