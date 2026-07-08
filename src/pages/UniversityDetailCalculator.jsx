@@ -666,7 +666,7 @@ Calculate your aggregate instantly on Dakhala:
                     <p className="text-xs text-muted dark:text-white/50 mt-1">Calculate your final entry test marks after negative marking (-0.25). Enter your total attempted and correct questions for each section from your physical slip.</p>
                   </div>
                   
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {uni.testPattern?.subjects?.map(sub => {
                       const data = slipData[sub.name] || { att: '', corr: '' };
                       const att = Number(data.att) || 0;
@@ -676,37 +676,37 @@ Calculate your aggregate instantly on Dakhala:
                       const net = (corr - penalty) * (sub.weight || 1);
                       
                       return (
-                        <div key={sub.name} className="bg-white/30 dark:bg-white/[0.01] p-4 rounded-xl border border-border dark:border-white/5 flex flex-col md:flex-row gap-4 items-center justify-between">
-                          <div className="flex-1">
+                        <div key={sub.name} className="bg-white/30 dark:bg-white/[0.01] p-3.5 rounded-xl border border-border dark:border-white/5 flex flex-col gap-3 justify-between">
+                          <div className="flex justify-between items-start">
                             <h5 className="font-bold text-sm text-ink dark:text-white">{sub.name}</h5>
-                            <p className="text-[10px] text-ink/50 dark:text-white/50 font-mono">Weight: {sub.weight || 1} | Total: {sub.mcqs} MCQs</p>
+                            <p className="text-[11px] text-ink/60 dark:text-white/60 font-mono">Wt: {sub.weight || 1} | Max: {sub.mcqs}</p>
                           </div>
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-between gap-2">
                             <div className="flex flex-col">
-                              <label className="text-[10px] font-bold text-ink/70 dark:text-white/70 mb-1">Attempted</label>
+                              <label className="text-[11px] uppercase tracking-wider font-bold text-ink/70 dark:text-white/70 mb-1">Attempted</label>
                               <input 
                                 type="number" 
                                 min="0" 
                                 max={sub.mcqs}
                                 value={data.att} 
                                 onChange={e => setSlipData({...slipData, [sub.name]: {...data, att: e.target.value}})}
-                                className="w-20 p-2 bg-white/50 dark:bg-black/20 border border-border dark:border-white/10 rounded-lg text-sm text-center focus:outline-none focus:border-[#1D2E28]"
+                                className="w-16 py-1.5 px-2 bg-white/50 dark:bg-black/20 border border-border dark:border-white/10 rounded-lg text-sm font-bold text-center focus:outline-none focus:border-[#1D2E28]"
                               />
                             </div>
                             <div className="flex flex-col">
-                              <label className="text-[10px] font-bold text-ink/70 dark:text-white/70 mb-1">Correct</label>
+                              <label className="text-[11px] uppercase tracking-wider font-bold text-ink/70 dark:text-white/70 mb-1">Correct</label>
                               <input 
                                 type="number" 
                                 min="0" 
                                 max={data.att || sub.mcqs}
                                 value={data.corr} 
                                 onChange={e => setSlipData({...slipData, [sub.name]: {...data, corr: e.target.value}})}
-                                className="w-20 p-2 bg-white/50 dark:bg-black/20 border border-border dark:border-white/10 rounded-lg text-sm text-center focus:outline-none focus:border-[#1D2E28]"
+                                className="w-16 py-1.5 px-2 bg-white/50 dark:bg-black/20 border border-border dark:border-white/10 rounded-lg text-sm font-bold text-center focus:outline-none focus:border-[#1D2E28]"
                               />
                             </div>
-                            <div className="flex flex-col items-center justify-center min-w-[60px] ml-2">
-                              <span className="text-[10px] font-bold text-ink/50 dark:text-white/50 mb-1">Score</span>
-                              <span className={`font-bold font-mono ${net >= 0 ? 'text-[#25A18E]' : 'text-rose-400'}`}>{net.toFixed(2)}</span>
+                            <div className="flex flex-col items-end justify-center">
+                              <span className="text-[11px] uppercase tracking-wider font-bold text-ink/50 dark:text-white/50 mb-1">Score</span>
+                              <span className={`text-lg font-black font-mono ${net >= 0 ? 'text-[#25A18E]' : 'text-rose-400'}`}>{net.toFixed(2)}</span>
                             </div>
                           </div>
                         </div>
