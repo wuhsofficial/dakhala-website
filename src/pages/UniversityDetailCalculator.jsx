@@ -907,11 +907,11 @@ Calculate your aggregate instantly on Dakhala:
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ type: "spring", bounce: 0.5 }}
-                        className="text-7xl md:text-8xl font-black text-[#1D2E28] tracking-tighter drop-shadow-md"
+                        className="text-6xl sm:text-7xl md:text-8xl font-black text-[#1D2E28] tracking-tighter drop-shadow-md"
                       >
                         {liveAggregate.toFixed(2)}
                       </motion.h2>
-                      <span className="text-4xl md:text-5xl font-bold text-[#1D2E28]/50">%</span>
+                      <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#1D2E28]/50">%</span>
                     </div>
                     
                     <div className="relative z-10 w-full max-w-lg bg-white/30 p-5 rounded-2xl backdrop-blur-md border border-white/50 shadow-sm group-hover:bg-white/40 transition-colors duration-500">
