@@ -670,8 +670,8 @@ Calculate your aggregate instantly on Dakhala:
                       {!skipTestCalc ? (
                         <div className="space-y-3">
                           <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                            <div className="flex flex-col gap-1.5">
-                              <label className="text-[10px] uppercase tracking-widest font-bold text-ink/50 dark:text-white/50">Correct Answers</label>
+                            <div className="flex flex-col gap-1.5 justify-end">
+                              <label className="text-[10px] uppercase tracking-widest font-bold text-ink/50 dark:text-white/50 leading-tight">Correct Answers</label>
                               <input
                                 type="number"
                                 value={correctAnswers}
@@ -679,8 +679,8 @@ Calculate your aggregate instantly on Dakhala:
                                 className="w-full p-3 bg-white/40 dark:bg-white/[0.02] border border-border dark:border-white/10 rounded-xl text-ink dark:text-white font-bold text-sm focus:border-[#1D2E28] focus:outline-none transition-colors"
                               />
                             </div>
-                            <div className="flex flex-col gap-1.5">
-                              <label className="text-[10px] uppercase tracking-widest font-bold text-ink/50 dark:text-white/50">Total MCQs</label>
+                            <div className="flex flex-col gap-1.5 justify-end">
+                              <label className="text-[10px] uppercase tracking-widest font-bold text-ink/50 dark:text-white/50 leading-tight">Total MCQs</label>
                               <input
                                 type="number"
                                 value={totalMcqs}
@@ -692,8 +692,8 @@ Calculate your aggregate instantly on Dakhala:
                           
                           {/* Negative Marking settings in MCQs calculator */}
                           {uni.testPattern && (
-                            <div className="flex items-center gap-4 py-1.5 px-3 bg-white/20 dark:bg-white/[0.01] rounded-xl border border-border dark:border-white/5 text-[11px] text-ink/60 dark:text-white/60">
-                              <label className="flex items-center gap-2 cursor-pointer">
+                            <div className="flex flex-wrap items-center gap-y-2 gap-x-4 py-2 px-3 bg-white/20 dark:bg-white/[0.01] rounded-xl border border-border dark:border-white/5 text-[11px] text-ink/60 dark:text-white/60">
+                              <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap">
                                 <input
                                   type="checkbox"
                                   checked={negMarking}
