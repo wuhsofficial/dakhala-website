@@ -461,11 +461,12 @@ Calculate your aggregate instantly on Dakhala:
               ))}
             </div>
 
-            <h1 className="text-2xl md:text-4xl font-black text-ink dark:text-white tracking-tight leading-tight">
-              <EditableBlock value={uni.name} onSave={(val) => updateUniversity(uni.id, { name: val })} />
-              <span className="text-black dark:text-gold ml-2 text-lg md:text-2xl font-extrabold">
+            <h1 className="text-2xl md:text-4xl font-black text-ink dark:text-white tracking-tight leading-tight flex flex-col md:flex-row md:items-baseline md:flex-wrap gap-x-2">
+              <span className="inline-flex"><EditableBlock value={uni.name} onSave={(val) => updateUniversity(uni.id, { name: val })} /></span>
+              <span className="text-black dark:text-gold text-lg md:text-2xl font-extrabold inline-flex">
                 (<EditableBlock value={uni.shortName} onSave={(val) => updateUniversity(uni.id, { shortName: val })} />)
               </span>
+              <span className="text-xl md:text-3xl text-[#25A18E] font-black w-full mt-1">Aggregate Calculator</span>
             </h1>
 
             <p className="text-xs md:text-sm text-muted dark:text-white/60 font-medium max-w-2xl">
@@ -669,8 +670,8 @@ Calculate your aggregate instantly on Dakhala:
                       {!skipTestCalc ? (
                         <div className="space-y-3">
                           <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                            <div className="flex flex-col gap-1.5">
-                              <label className="text-[10px] uppercase tracking-widest font-bold text-ink/50 dark:text-white/50">Correct Answers</label>
+                            <div className="flex flex-col gap-1.5 justify-end">
+                              <label className="text-[10px] uppercase tracking-widest font-bold text-ink/50 dark:text-white/50 leading-tight">Correct Answers</label>
                               <input
                                 type="number"
                                 value={correctAnswers}
@@ -678,8 +679,8 @@ Calculate your aggregate instantly on Dakhala:
                                 className="w-full p-3 bg-white/40 dark:bg-white/[0.02] border border-border dark:border-white/10 rounded-xl text-ink dark:text-white font-bold text-sm focus:border-[#1D2E28] focus:outline-none transition-colors"
                               />
                             </div>
-                            <div className="flex flex-col gap-1.5">
-                              <label className="text-[10px] uppercase tracking-widest font-bold text-ink/50 dark:text-white/50">Total MCQs</label>
+                            <div className="flex flex-col gap-1.5 justify-end">
+                              <label className="text-[10px] uppercase tracking-widest font-bold text-ink/50 dark:text-white/50 leading-tight">Total MCQs</label>
                               <input
                                 type="number"
                                 value={totalMcqs}
@@ -691,8 +692,8 @@ Calculate your aggregate instantly on Dakhala:
                           
                           {/* Negative Marking settings in MCQs calculator */}
                           {uni.testPattern && (
-                            <div className="flex items-center gap-4 py-1.5 px-3 bg-white/20 dark:bg-white/[0.01] rounded-xl border border-border dark:border-white/5 text-[11px] text-ink/60 dark:text-white/60">
-                              <label className="flex items-center gap-2 cursor-pointer">
+                            <div className="flex flex-wrap items-center gap-y-2 gap-x-4 py-2 px-3 bg-white/20 dark:bg-white/[0.01] rounded-xl border border-border dark:border-white/5 text-[11px] text-ink/60 dark:text-white/60">
+                              <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap">
                                 <input
                                   type="checkbox"
                                   checked={negMarking}
@@ -906,11 +907,11 @@ Calculate your aggregate instantly on Dakhala:
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ type: "spring", bounce: 0.5 }}
-                        className="text-7xl md:text-8xl font-black text-[#1D2E28] tracking-tighter drop-shadow-md"
+                        className="text-6xl sm:text-7xl md:text-8xl font-black text-[#1D2E28] tracking-tighter drop-shadow-md"
                       >
                         {liveAggregate.toFixed(2)}
                       </motion.h2>
-                      <span className="text-4xl md:text-5xl font-bold text-[#1D2E28]/50">%</span>
+                      <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#1D2E28]/50">%</span>
                     </div>
                     
                     <div className="relative z-10 w-full max-w-lg bg-white/30 p-5 rounded-2xl backdrop-blur-md border border-white/50 shadow-sm group-hover:bg-white/40 transition-colors duration-500">
