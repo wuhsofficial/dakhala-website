@@ -461,11 +461,12 @@ Calculate your aggregate instantly on Dakhala:
               ))}
             </div>
 
-            <h1 className="text-2xl md:text-4xl font-black text-ink dark:text-white tracking-tight leading-tight">
-              <EditableBlock value={uni.name} onSave={(val) => updateUniversity(uni.id, { name: val })} />
-              <span className="text-black dark:text-gold ml-2 text-lg md:text-2xl font-extrabold">
+            <h1 className="text-2xl md:text-4xl font-black text-ink dark:text-white tracking-tight leading-tight flex flex-col md:flex-row md:items-baseline md:flex-wrap gap-x-2">
+              <span className="inline-flex"><EditableBlock value={uni.name} onSave={(val) => updateUniversity(uni.id, { name: val })} /></span>
+              <span className="text-black dark:text-gold text-lg md:text-2xl font-extrabold inline-flex">
                 (<EditableBlock value={uni.shortName} onSave={(val) => updateUniversity(uni.id, { shortName: val })} />)
               </span>
+              <span className="text-xl md:text-3xl text-[#25A18E] font-black w-full mt-1">Aggregate Calculator</span>
             </h1>
 
             <p className="text-xs md:text-sm text-muted dark:text-white/60 font-medium max-w-2xl">
