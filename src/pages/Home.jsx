@@ -23,6 +23,7 @@ import {
   allUniversities,
   getUniversityLogo
 } from '../data/universities';
+import { getPublicStats } from '../lib/telemetry';
 import AdvancedSearch from '../components/AdvancedSearch';
 import SpotlightCard from '../components/SpotlightCard';
 
@@ -47,39 +48,46 @@ export default function Home() {
   const [compUniB, setCompUniB] = useState('fast');
 
   // Live Statistics State
-  const [stats, setStats] = useState({ calculations: 120000, universities: 0, consults: 10000 });
+  const [stats, setStats] = useState({ calculations: 0, universities: 0, consults: 0 });
 
   // FAQ Accordion State
   const [faqActiveIdx, setFaqActiveIdx] = useState(null);
 
   // Animate stats counting up on mount
   useEffect(() => {
-    const duration = 2000; // 2 seconds
-    const startTime = performance.now();
+    let isMounted = true;
 
-    const targetCalculations = 124582;
-    const targetUniversities = allUniversities.length || 45;
-    const targetConsults = 12840;
+    getPublicStats().then((data) => {
+      if (!isMounted) return;
+      const duration = 2000; // 2 seconds
+      const startTime = performance.now();
 
-    const animate = (currentTime) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      // Easing function: outQuad
-      const easeProgress = progress * (2 - progress);
+      const targetCalculations = data.calculations || 0;
+      const targetUniversities = allUniversities.length || 45;
+      const targetConsults = data.consults || 0;
 
-      setStats({
-        calculations: Math.floor(easeProgress * targetCalculations),
-        universities: Math.floor(easeProgress * targetUniversities),
-        consults: Math.floor(easeProgress * targetConsults)
-      });
+      const animate = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function: outQuad
+        const easeProgress = progress * (2 - progress);
 
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
+        setStats({
+          calculations: Math.floor(easeProgress * targetCalculations),
+          universities: Math.floor(easeProgress * targetUniversities),
+          consults: Math.floor(easeProgress * targetConsults)
+        });
 
-    requestAnimationFrame(animate);
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+
+      requestAnimationFrame(animate);
+    });
+
+    return () => { isMounted = false; };
   }, []);
 
   // Get current weights for quick calculator
@@ -302,34 +310,34 @@ export default function Home() {
             </p>
             
             <div className="relative w-full h-24 mb-3 group/chart">
-              <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+              <svg className="w-full h-full overflow-visible" viewBox="0 -10 100 50" preserveAspectRatio="none">
                 <line x1="0" y1="30" x2="100" y2="30" stroke="rgba(0,0,0,0.05)" className="dark:stroke-white/5" strokeWidth="0.5" />
                 <line x1="0" y1="20" x2="100" y2="20" stroke="rgba(0,0,0,0.05)" className="dark:stroke-white/5" strokeWidth="0.5" />
                 <line x1="0" y1="10" x2="100" y2="10" stroke="rgba(0,0,0,0.05)" className="dark:stroke-white/5" strokeWidth="0.5" />
                 
                 <path 
-                  d="M 5,30 L 28,26 L 51,21 L 74,15 L 95,8" 
+                  d="M 10,30 L 30,26 L 50,21 L 70,15 L 90,8" 
                   fill="none" 
-                  stroke="#3B82F6" 
+                  stroke="#0B5D56" 
                   strokeWidth="2.5" 
                   strokeLinecap="round"
-                  className="drop-shadow-[0_2px_8px_rgba(59,130,246,0.4)]"
+                  className="drop-shadow-[0_2px_8px_rgba(11,93,86,0.4)]"
                 />
                 
                 {[
-                  { x: 5, y: 30, year: 2021, val: "74.0%" },
-                  { x: 28, y: 26, year: 2022, val: "76.0%" },
-                  { x: 51, y: 21, year: 2023, val: "78.5%" },
-                  { x: 74, y: 15, year: 2024, val: "79.8%" },
-                  { x: 95, y: 8, year: 2025, val: "80.5%" }
+                  { x: 10, y: 30, year: 2022, val: "76.0%" },
+                  { x: 30, y: 26, year: 2023, val: "78.5%" },
+                  { x: 50, y: 21, year: 2024, val: "79.8%" },
+                  { x: 70, y: 15, year: 2025, val: "80.5%" },
+                  { x: 90, y: 8, year: 2026, val: "82.4%" }
                 ].map((pt, idx) => (
                   <g key={idx} className="cursor-pointer group/node">
                     <circle 
                       cx={pt.x} 
                       cy={pt.y} 
                       r="2.5" 
-                      fill="#3B82F6" 
-                      className="hover:r-3.5 transition-all fill-white stroke-[#3B82F6] stroke-2" 
+                      fill="#0B5D56" 
+                      className="hover:r-3.5 transition-all fill-white stroke-[#0B5D56] stroke-2" 
                     />
                     <text 
                       x={pt.x} 
@@ -344,12 +352,16 @@ export default function Home() {
                 ))}
               </svg>
             </div>
-            <div className="flex justify-between text-[10px] text-muted font-bold px-1.5 font-sans">
-              <span>2021</span>
-              <span>2022</span>
-              <span>2023</span>
-              <span>2024</span>
-              <span>2025</span>
+            <div className="relative w-full h-4 mt-2">
+              {[2022, 2023, 2024, 2025, 2026].map((yr, i) => (
+                <span 
+                  key={yr}
+                  className="absolute text-[10px] text-muted font-bold font-sans text-center transform -translate-x-1/2"
+                  style={{ left: `${10 + i * 20}%` }}
+                >
+                  {yr}
+                </span>
+              ))}
             </div>
           </div>
           

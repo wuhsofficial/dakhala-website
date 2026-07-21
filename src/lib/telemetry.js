@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, getDocs, getCountFromServer, query, where } from 'firebase/firestore';
 
 const getVisitorId = () => {
   let id = localStorage.getItem('dakhala_telemetry_visitor_id');
@@ -77,7 +77,9 @@ export const getAnalyticsSummary = async () => {
     const conversionRate = totalViews > 0 ? ((totalCalcs / totalViews) * 100).toFixed(2) : 0;
     
     // Calculate distribution statistics for calculations
-    const scores = calcs.map(c => c.aggregate);
+    const scores = calcs
+      .map(c => parseFloat(c.aggregate))
+      .filter(s => !isNaN(s) && s >= 0 && s <= 100);
     let mean = 0;
     let median = 0;
     let stdDev = 0;
@@ -173,5 +175,21 @@ export const getAnalyticsSummary = async () => {
   } catch (error) {
     console.error("Error fetching analytics", error);
     return null;
+  }
+};
+
+export const getPublicStats = async () => {
+  if (!db) return { calculations: 0, consults: 0 };
+  try {
+    const calcsSnap = await getCountFromServer(collection(db, 'analytics_calcs'));
+    const actionsQuery = query(collection(db, 'analytics_actions'), where('name', '==', 'whatsapp_click'));
+    const consultsSnap = await getCountFromServer(actionsQuery);
+    return {
+      calculations: calcsSnap.data().count,
+      consults: consultsSnap.data().count
+    };
+  } catch (error) {
+    console.error("Error fetching public stats", error);
+    return { calculations: 0, consults: 0 };
   }
 };

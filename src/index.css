@@ -53,11 +53,11 @@ h1, h2, h3, h4, h5, h6, .logo-font {
 /* Advanced Glassmorphism style cards matching xost.pro */
 .flat-card {
   background: rgba(244, 250, 249, 0.65) !important; /* Soft pale minty white translucent glass */
-  border: 1px solid rgba(11, 93, 86, 0.12) !important;
+  border: 1px solid rgba(11, 93, 86, 0.05) !important;
   border-radius: 1.5rem !important; /* rounded-3xl */
   backdrop-filter: blur(16px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-  box-shadow: 0 8px 32px 0 rgba(11, 93, 86, 0.03), inset 0 0 0 1px rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 8px 32px 0 rgba(11, 93, 86, 0.04), inset 0 1px 0 0 rgba(255, 255, 255, 0.6) !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -68,8 +68,8 @@ h1, h2, h3, h4, h5, h6, .logo-font {
 }
 
 .flat-card:hover {
-  border-color: rgba(11, 93, 86, 0.4) !important;
-  box-shadow: 0 12px 40px rgba(11, 93, 86, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.5) !important;
+  border-color: rgba(11, 93, 86, 0.15) !important;
+  box-shadow: 0 12px 40px rgba(11, 93, 86, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 0.6) !important;
   transform: translateY(-4px);
 }
 
