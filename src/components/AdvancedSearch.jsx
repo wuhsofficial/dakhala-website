@@ -64,15 +64,15 @@ export default function AdvancedSearch() {
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="absolute -top-7 left-4 flex items-center gap-1.5 text-xs font-bold text-gold uppercase tracking-widest bg-white/90 backdrop-blur-md px-3 py-1 rounded-t-lg border-t border-x border-gold/30"
+        className="absolute -top-7 left-4 flex items-center gap-1.5 text-xs font-bold text-gold uppercase tracking-widest bg-white/90 dark:bg-[#0C132C]/90 backdrop-blur-md px-3 py-1 rounded-t-lg border-t border-x border-gold/30"
       >
         <Sparkles className="w-3.5 h-3.5" /> AI Powered Search
       </motion.div>
 
       <motion.form
         onSubmit={handleSearch}
-        className={`relative bg-white/80 backdrop-blur-2xl rounded-2xl border-2 transition-all duration-300 shadow-2xl ${
-          isFocused ? 'border-gold shadow-gold/20' : 'border-border/60 hover:border-gold/50'
+        className={`relative bg-white/80 dark:bg-[#0C132C]/80 backdrop-blur-2xl rounded-2xl border-2 transition-all duration-300 shadow-2xl ${
+          isFocused ? 'border-gold shadow-gold/20' : 'border-border/60 dark:border-white/10 hover:border-gold/50'
         }`}
       >
         {/* Animated Glow when focused */}
@@ -96,7 +96,7 @@ export default function AdvancedSearch() {
                 <Sparkles className="w-6 h-6" />
               </motion.div>
             ) : (
-              <Search className="w-6 h-6 text-ink/40" />
+              <Search className="w-6 h-6 text-ink/40 dark:text-white/40" />
             )}
           </div>
 
@@ -108,7 +108,7 @@ export default function AdvancedSearch() {
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             onKeyDown={handleKeyDown}
             placeholder="Type anything... e.g., Software Engineering under 80% aggregate"
-            className="flex-1 w-full min-h-[110px] sm:min-h-[60px] max-h-[120px] bg-transparent resize-none outline-none py-3 px-4 text-ink text-lg font-medium placeholder-ink/30"
+            className="flex-1 w-full min-h-[110px] sm:min-h-[60px] max-h-[120px] bg-transparent resize-none outline-none py-3 px-4 text-ink dark:text-white text-lg font-medium placeholder-ink/30 dark:placeholder-white/30"
             style={{ overflowY: query.length > 100 ? 'auto' : 'hidden' }}
             disabled={isSearching}
           />
@@ -119,8 +119,8 @@ export default function AdvancedSearch() {
               disabled={!query.trim() || isSearching}
               className={`p-3 rounded-xl flex items-center justify-center transition-all ${
                 query.trim() && !isSearching
-                  ? 'bg-ink text-white hover:bg-gold shadow-lg hover:-translate-y-0.5'
-                  : 'bg-cloudy text-ink/30 cursor-not-allowed'
+                  ? 'bg-ink dark:bg-white text-white dark:text-ink hover:bg-gold dark:hover:bg-gold shadow-lg hover:-translate-y-0.5'
+                  : 'bg-cloudy dark:bg-white/5 text-ink/30 dark:text-white/30 cursor-not-allowed'
               }`}
             >
               {isSearching ? (
@@ -139,7 +139,7 @@ export default function AdvancedSearch() {
               initial={{ opacity: 0, y: -10, height: 0 }}
               animate={{ opacity: 1, y: 0, height: 'auto' }}
               exit={{ opacity: 0, y: -10, height: 0 }}
-              className="border-t border-border/50 overflow-hidden bg-white/95 backdrop-blur-xl rounded-b-2xl"
+              className="border-t border-border/50 dark:border-white/10 overflow-hidden bg-white/95 dark:bg-[#0C132C]/95 backdrop-blur-xl rounded-b-2xl"
             >
               <div className="p-4">
                 <div className="flex items-center gap-2 mb-3">
@@ -159,12 +159,12 @@ export default function AdvancedSearch() {
                         setQuery(sug.text);
                         setIsFocused(true);
                       }}
-                      className="w-full text-left p-3 rounded-xl hover:bg-cloudy transition-colors flex items-center gap-3 group"
+                      className="w-full text-left p-3 rounded-xl hover:bg-cloudy dark:hover:bg-white/5 transition-colors flex items-center gap-3 group"
                     >
-                      <div className={`${sug.bg} p-2 rounded-lg ${sug.color} group-hover:scale-110 transition-transform`}>
+                      <div className={`${sug.bg} dark:bg-opacity-10 p-2 rounded-lg ${sug.color} dark:text-opacity-90 group-hover:scale-110 transition-transform`}>
                         {sug.icon}
                       </div>
-                      <span className="text-sm font-semibold text-ink group-hover:text-gold transition-colors">
+                      <span className="text-sm font-semibold text-ink dark:text-white group-hover:text-gold dark:group-hover:text-gold transition-colors">
                         {sug.text}
                       </span>
                     </button>
@@ -172,9 +172,9 @@ export default function AdvancedSearch() {
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <span className="px-3 py-1 bg-gold/10 text-goldDark text-xs font-bold rounded-full border border-gold/20">Focus: AI & NLP</span>
-                  <span className="px-3 py-1 bg-maqsadBlue/10 text-blue-700 text-xs font-bold rounded-full border border-blue-200">Pre-Medical</span>
-                  <span className="px-3 py-1 bg-maqsadOrange/10 text-orange-700 text-xs font-bold rounded-full border border-orange-200">Computing</span>
+                  <span className="px-3 py-1 bg-gold/10 text-goldDark dark:text-gold text-xs font-bold rounded-full border border-gold/20">Focus: AI & NLP</span>
+                  <span className="px-3 py-1 bg-maqsadBlue/10 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-full border border-blue-200 dark:border-blue-500/30">Pre-Medical</span>
+                  <span className="px-3 py-1 bg-maqsadOrange/10 text-orange-700 dark:text-orange-300 text-xs font-bold rounded-full border border-orange-200 dark:border-orange-500/30">Computing</span>
                 </div>
               </div>
             </motion.div>
